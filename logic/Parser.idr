@@ -23,4 +23,14 @@ instance Alternative Parser where
 instance Monad Parser where
   (MkParser m) >>= f = MkParser (m >>= (unParser . f))
 
+anyChar : Parser Char
+anyChar = MkParser $ ST go
+ where go "" = Nothing
+       go str = Just (strHead str, strTail str)
 
+many : Parser a -> Parser (List a)
+many p = go <|> pure []
+ where go = do
+         v <- p
+         vs <- many p
+         pure (v :: vs)
