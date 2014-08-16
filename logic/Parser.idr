@@ -14,9 +14,8 @@ satisfy f = do
   c <- anyChar
   if f c then pure c else empty
 
-{-
-takeWhile : (Char -> Bool) -> Parser String
-takeWhile f = map pack go
- where go = do
-         c <- anyChar
--}
+public takeWhile : (Char -> Bool) -> Parser (List Char)
+takeWhile f = many (satisfy f)
+
+public between : Parser before -> Parser after -> Parser a -> Parser a
+between before after p = before $> p <$ after
