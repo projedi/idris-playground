@@ -50,7 +50,7 @@ prettyPrint = go (-9000)
        go p (Mul e1 e2) = withParens p 1 (go 1 e1 ++ " * " ++ go 1 e2)
 
 parse : String -> Maybe Expression
-parse = Parser.Internal.parse (between spaces endOfInput (buildExpressionParser ops simpleExpression))
+parse = Parser.Internal.parse (between spaces endOfInput expression)
  where parens : Parser a -> Parser a
        parens = between (lexeme $ char '(') (lexeme $ char ')')
        identifier : Parser String
@@ -59,5 +59,10 @@ parse = Parser.Internal.parse (between spaces endOfInput (buildExpressionParser 
        number = lexeme $ integer
        oper : String -> Parser ()
        oper op = lexeme $ string op
-       simpleExpression = [| Var identifier |] <|> [| Const number |]
+       ops : OperatorTable Expression
        ops = [[ Infix (oper "*" $> pure Mul) AssocLeft ], [ Infix (oper "+" $> pure Add) AssocLeft ]]
+       mutual
+         simpleExpression : Parser Expression
+         simpleExpression = [| Var identifier |] <|> [| Const number |] <|> parens expression
+         expression : Parser Expression
+         expression = buildExpressionParser ops simpleExpression
