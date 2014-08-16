@@ -29,9 +29,22 @@ between before after p = before $> p <$ after
 public char : Char -> Parser Char
 char c = satisfy (== c)
 
-public parens : Parser a -> Parser a
-parens = between (char '(') (char ')')
-
 public integer : Parser Int
 integer = map (foldl go 0) (takeWhile1 isDigit)
  where go acc elt = acc * 10 + (prim__charToInt elt - 48)
+
+public string : String -> Parser ()
+string str = go (unpack str)
+ where go [] = pure ()
+       go (x :: xs) = char x $> go xs
+
+public space : Parser Char
+space = satisfy isSpace
+
+public spaces : Parser ()
+spaces = do
+  _ <- takeWhile isSpace
+  pure ()
+
+public lexeme : Parser a -> Parser a
+lexeme p = p <$ spaces

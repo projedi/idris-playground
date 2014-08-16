@@ -1,5 +1,7 @@
 module ex1
 
+import Parser
+
 data Expression
   = Var String
   | Const Int
@@ -46,3 +48,16 @@ prettyPrint = go (-9000)
        go _ (Const i) = show i
        go p (Add e1 e2) = withParens p 0 (go 0 e1 ++ " + " ++ go 0 e2)
        go p (Mul e1 e2) = withParens p 1 (go 1 e1 ++ " * " ++ go 1 e2)
+
+parse : String -> Maybe Expression
+parse = Parser.Internal.parse (between spaces endOfInput (buildExpressionParser ops simpleExpression))
+ where parens : Parser a -> Parser a
+       parens = between (lexeme $ char '(') (lexeme $ char ')')
+       identifier : Parser String
+       identifier = lexeme $ map pack $ takeWhile1 isAlpha
+       number : Parser Int
+       number = lexeme $ integer
+       oper : String -> Parser ()
+       oper op = lexeme $ string op
+       simpleExpression = [| Var identifier |] <|> [| Const number |]
+       ops = [[ Infix (oper "*" $> pure Mul) AssocLeft ], [ Infix (oper "+" $> pure Add) AssocLeft ]]
