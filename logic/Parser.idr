@@ -5,6 +5,9 @@ import Control.Monad.State
 abstract record Parser : (a : Type) -> Type where
   MkParser : (unParser : StateT String Maybe a) -> Parser a
 
+parse : Parser a -> String -> Maybe a
+parse (MkParser m) str = map fst $ runStateT m str
+
 instance Functor Parser where
   map f (MkParser m) = MkParser (map f m)
 
