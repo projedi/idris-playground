@@ -8,6 +8,16 @@ data Expression
   | Add Expression Expression
   | Mul Expression Expression
   | Exp Expression Expression
+  | Sub Expression Expression
+
+instance Eq Expression where
+  (Var x) == (Var y) = x == y
+  (Const n) == (Const m) = n == m
+  (Add e1 e2) == (Add e3 e4) = e1 == e3 && e2 == e4
+  (Mul e1 e2) == (Mul e3 e4) = e1 == e3 && e2 == e4
+  (Exp e1 e2) == (Exp e3 e4) = e1 == e3 && e2 == e4
+  (Sub e1 e2) == (Sub e3 e4) = e1 == e3 && e2 == e4
+  _ == _ = False
 
 infixr 11 ^
 (^) : Int -> Int -> Int
@@ -27,12 +37,16 @@ simplify1 (Exp x (Const 0)) = Const 1
 simplify1 (Exp x (Const 1)) = x
 simplify1 (Exp (Const 0) x) = Const 0 -- 0^0 will be 1
 simplify1 (Exp (Const 1) x) = x
+simplify1 (Sub (Const n) (Const m)) = Const (n - m)
+simplify1 (Sub x (Const 0)) = x
+simplify1 (Sub x y) = if x == y then Const 0 else Sub x y
 simplify1 x = x
 
 simplify : Expression -> Expression
 simplify (Add e1 e2) = simplify1 (Add (simplify e1) (simplify e2))
 simplify (Mul e1 e2) = simplify1 (Mul (simplify e1) (simplify e2))
 simplify (Exp e1 e2) = simplify1 (Exp (simplify e1) (simplify e2))
+simplify (Sub e1 e2) = simplify1 (Sub (simplify e1) (simplify e2))
 simplify x = simplify1 x
 
 prettyPrint : Expression -> String
@@ -45,6 +59,7 @@ prettyPrint = go (-9000)
        go p (Add e1 e2) = withParens p 0 (go 0 e1 ++ " + " ++ go 0 e2)
        go p (Mul e1 e2) = withParens p 1 (go 1 e1 ++ " * " ++ go 1 e2)
        go p (Exp e1 e2) = withParens p 2 (go 2 e1 ++ " ^ " ++ go 2 e2)
+       go p (Sub e1 e2) = withParens p 0 (go 0 e1 ++ " - " ++ go 2 e2)
 
 parse : String -> Maybe Expression
 parse = Parser.Internal.parse (between spaces endOfInput expression)
@@ -60,7 +75,7 @@ parse = Parser.Internal.parse (between spaces endOfInput expression)
        ops =
          [ [ Infix (oper "^" $> pure Exp) AssocRight ]
          , [ Infix ((oper "*" <|> oper "") $> pure Mul) AssocLeft ]
-         , [ Infix (oper "+" $> pure Add) AssocLeft ]
+         , [ Infix (oper "+" $> pure Add) AssocLeft, Infix (oper "-" $> pure Sub) AssocLeft ]
          ]
        mutual
          simpleExpression : Parser Expression
