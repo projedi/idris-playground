@@ -66,3 +66,6 @@ parse = Parser.Internal.parse (between spaces endOfInput expression)
          simpleExpression = [| Var identifier |] <|> [| Const number |] <|> parens expression
          expression : Parser Expression
          expression = buildExpressionParser ops simpleExpression
+
+onExpr : (Expression -> Expression) -> String -> Maybe String
+onExpr f str = [| (prettyPrint . f) (parse str) |]
