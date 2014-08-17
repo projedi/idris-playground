@@ -7,6 +7,11 @@ data Expression
   | Const Int
   | Add Expression Expression
   | Mul Expression Expression
+  | Exp Expression Expression
+
+infixr 11 ^
+(^) : Int -> Int -> Int
+x ^ y = if y < 0 then 0 else if y == 0 then 1 else x * x ^ (y - 1)
 
 simplify1 : Expression -> Expression
 simplify1 (Add (Const m) (Const n)) = Const (m + n)
@@ -17,11 +22,17 @@ simplify1 (Mul (Const 0) x) = Const 0
 simplify1 (Mul x (Const 0)) = Const 0
 simplify1 (Mul (Const 1) x) = x
 simplify1 (Mul x (Const 1)) = x
+simplify1 (Exp (Const n) (Const m)) = Const (n ^ m)
+simplify1 (Exp x (Const 0)) = Const 1
+simplify1 (Exp x (Const 1)) = x
+simplify1 (Exp (Const 0) x) = Const 0 -- 0^0 will be 1
+simplify1 (Exp (Const 1) x) = x
 simplify1 x = x
 
 simplify : Expression -> Expression
 simplify (Add e1 e2) = simplify1 (Add (simplify e1) (simplify e2))
 simplify (Mul e1 e2) = simplify1 (Mul (simplify e1) (simplify e2))
+simplify (Exp e1 e2) = simplify1 (Exp (simplify e1) (simplify e2))
 simplify x = simplify1 x
 
 prettyPrint : Expression -> String
@@ -33,6 +44,7 @@ prettyPrint = go (-9000)
        go _ (Const i) = show i
        go p (Add e1 e2) = withParens p 0 (go 0 e1 ++ " + " ++ go 0 e2)
        go p (Mul e1 e2) = withParens p 1 (go 1 e1 ++ " * " ++ go 1 e2)
+       go p (Exp e1 e2) = withParens p 2 (go 2 e1 ++ " ^ " ++ go 2 e2)
 
 parse : String -> Maybe Expression
 parse = Parser.Internal.parse (between spaces endOfInput expression)
@@ -45,7 +57,11 @@ parse = Parser.Internal.parse (between spaces endOfInput expression)
        oper : String -> Parser ()
        oper op = lexeme $ string op
        ops : OperatorTable Expression
-       ops = [[ Infix ((oper "*" <|> oper "") $> pure Mul) AssocLeft ], [ Infix (oper "+" $> pure Add) AssocLeft ]]
+       ops =
+         [ [ Infix (oper "^" $> pure Exp) AssocRight ]
+         , [ Infix ((oper "*" <|> oper "") $> pure Mul) AssocLeft ]
+         , [ Infix (oper "+" $> pure Add) AssocLeft ]
+         ]
        mutual
          simpleExpression : Parser Expression
          simpleExpression = [| Var identifier |] <|> [| Const number |] <|> parens expression
