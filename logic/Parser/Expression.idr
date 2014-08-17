@@ -36,11 +36,15 @@ makeParser term ops = do
   let (rassoc, lassoc, nassoc, pref, postf) = foldr splitOp (empty, empty, empty, empty, empty) ops
   x <- termP pref postf
   rassocP pref postf rassoc x <|> lassocP pref postf lassoc x <|> nassocP pref postf nassoc x <|> pure x
- where termP : Parser (a -> a) -> Parser (a -> a) -> Parser a
+ where preP : Parser (a -> a) -> Parser (a -> a)
+       preP pref = map (foldr (.) id) (many pref)
+       postP : Parser (a -> a) -> Parser (a -> a)
+       postP postf = map (foldl (.) id) (many postf)
+       termP : Parser (a -> a) -> Parser (a -> a) -> Parser a
        termP pref postf = do
-         pre <- pref <|> pure id
+         pre <- preP pref
          x <- term
-         post <- postf <|> pure id
+         post <- postP postf
          return $ post $ pre x
        rassocP : Parser (a -> a) -> Parser (a -> a) -> Parser (a -> a -> a) -> a -> Parser a
        rassocP pref postf rassoc x = do
