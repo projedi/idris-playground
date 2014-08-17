@@ -83,7 +83,7 @@ parse = Parser.Internal.parse (between spaces endOfInput expression)
        ops =
          [ [ Prefix (oper "-" $> pure Neg) ]
          , [ Infix (oper "^" $> pure Exp) AssocRight ]
-         , [ Infix ((oper "*" <|> oper "") $> pure Mul) AssocLeft ]
+         , [ Infix (oper "*" $> pure Mul) AssocLeft ]
          , [ Infix (oper "+" $> pure Add) AssocLeft, Infix (oper "-" $> pure Sub) AssocLeft ]
          ]
        mutual
