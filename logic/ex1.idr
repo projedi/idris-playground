@@ -60,7 +60,7 @@ parse = Parser.Internal.parse (between spaces endOfInput expression)
        oper : String -> Parser ()
        oper op = lexeme $ string op
        ops : OperatorTable Expression
-       ops = [[ Infix (oper "*" $> pure Mul) AssocLeft ], [ Infix (oper "+" $> pure Add) AssocLeft ]]
+       ops = [[ Infix ((oper "*" <|> oper "") $> pure Mul) AssocLeft ], [ Infix (oper "+" $> pure Add) AssocLeft ]]
        mutual
          simpleExpression : Parser Expression
          simpleExpression = [| Var identifier |] <|> [| Const number |] <|> parens expression
