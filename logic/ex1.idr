@@ -24,21 +24,6 @@ simplify (Add e1 e2) = simplify1 (Add (simplify e1) (simplify e2))
 simplify (Mul e1 e2) = simplify1 (Mul (simplify e1) (simplify e2))
 simplify x = simplify1 x
 
-v : String -> Expression
-v = Var
-
-c : Int -> Expression
-c = Const
-
-(+) : Expression -> Expression -> Expression
-(+) = Add
-
-(*) : Expression -> Expression -> Expression
-(*) = Mul
-
-e : Expression
-e = (c 0 * v "x" + c 1) * c 3 + c 12
-
 prettyPrint : Expression -> String
 prettyPrint = go (-9000)
  where withParens : Int -> Int -> String -> String
