@@ -14,6 +14,37 @@ data Formula a
   | Forall String (Formula a)
   | Exists String (Formula a)
 
+onatoms : (a -> Formula b) -> Formula a -> Formula b
+onatoms _ False = False
+onatoms _ True = True
+onatoms g (Atom x) = g x
+onatoms g (Not f) = Not (onatoms g f)
+onatoms g (And f1 f2) = And (onatoms g f1) (onatoms g f2)
+onatoms g (Or f1 f2) = Or (onatoms g f1) (onatoms g f2)
+onatoms g (Imp f1 f2) = Imp (onatoms g f1) (onatoms g f2)
+onatoms g (Iff f1 f2) = Iff (onatoms g f1) (onatoms g f2)
+onatoms g (Forall x f) = Forall x (onatoms g f)
+onatoms g (Exists x f) = Exists x (onatoms g f)
+
+instance Functor Formula where
+  map _ False = False
+  map _ True = True
+  map g (Atom x) = Atom (g x)
+  map g (Not f) = Not (map g f)
+  map g (And f1 f2) = And (map g f1) (map g f2)
+  map g (Or f1 f2) = Or (map g f1) (map g f2)
+  map g (Imp f1 f2) = Imp (map g f1) (map g f2)
+  map g (Iff f1 f2) = Iff (map g f1) (map g f2)
+  map g (Forall x f) = Forall x (map g f)
+  map g (Exists x f) = Exists x (map g f)
+
+instance Applicative Formula where
+  pure x = Atom x
+  f <$> x = onatoms (\y => onatoms (pure . y) x) f
+
+instance Monad Formula where
+  (>>=) = flip onatoms
+
 identifier : Parser String
 identifier = lexeme $ map pack $ takeWhile1 isAlpha
 
