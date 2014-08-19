@@ -69,6 +69,26 @@ instance Traversable Formula where
   traverse g (Forall x f) = [| (Forall x) (traverse g f) |]
   traverse g (Exists x f) = [| (Exists x) (traverse g f) |]
 
+atoms : (Eq b) => (a -> b) -> Formula a -> List b
+atoms g = nub . foldr (\x => \xs => g x :: xs) []
+
+eval : (a -> Bool) -> Formula a -> Bool
+eval h False = False
+eval h True = True
+eval h (Atom x) = h x
+eval h (Not f) = not (eval h f)
+eval h (And f1 f2) = eval h f1 && eval h f2
+eval h (Or f1 f2) = eval h f1 || eval h f2
+eval h (Imp f1 f2) = not (eval h f1) || eval h f2
+eval h (Iff f1 f2) = eval h f1 == eval h f2
+
+onallvaluations : (Eq a) => ((a -> Bool) -> Bool) -> (a -> Bool) -> List a -> Bool
+onallvaluations subfn v [] = subfn v
+onallvaluations subfn v (p :: ps) =
+  onallvaluations subfn (v' False) ps && onallvaluations subfn (v' True) ps
+ where v' : Bool -> a -> Bool
+       v' t q = if q == p then t else v q
+
 identifier : Parser String
 identifier = lexeme $ map pack $ takeWhile1 isAlpha
 
