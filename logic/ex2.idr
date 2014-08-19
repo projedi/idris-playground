@@ -45,6 +45,30 @@ instance Applicative Formula where
 instance Monad Formula where
   (>>=) = flip onatoms
 
+instance Foldable Formula where
+  foldr g acc False = acc
+  foldr g acc True = acc
+  foldr g acc (Atom x) = g x acc
+  foldr g acc (Not x) = foldr g acc x
+  foldr g acc (And x y) = foldr g (foldr g acc y) x
+  foldr g acc (Or x y) = foldr g (foldr g acc y) x
+  foldr g acc (Imp x y) = foldr g (foldr g acc y) x
+  foldr g acc (Iff x y) = foldr g (foldr g acc y) x
+  foldr g acc (Forall x f) = foldr g acc f
+  foldr g acc (Exists x f) = foldr g acc f
+
+instance Traversable Formula where
+  traverse g False = pure False
+  traverse g True = pure True
+  traverse g (Atom x) = [| Atom (g x) |]
+  traverse g (Not f) = [| Not (traverse g f) |]
+  traverse g (And f1 f2) = [| And (traverse g f1) (traverse g f2) |]
+  traverse g (Or f1 f2) = [| Or (traverse g f1) (traverse g f2) |]
+  traverse g (Imp f1 f2) = [| Imp (traverse g f1) (traverse g f2) |]
+  traverse g (Iff f1 f2) = [| Iff (traverse g f1) (traverse g f2) |]
+  traverse g (Forall x f) = [| (Forall x) (traverse g f) |]
+  traverse g (Exists x f) = [| (Exists x) (traverse g f) |]
+
 identifier : Parser String
 identifier = lexeme $ map pack $ takeWhile1 isAlpha
 
