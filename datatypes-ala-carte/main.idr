@@ -66,3 +66,17 @@ val x = inject (MkVal x)
 
 addExample2 : Expr ((:+:) Val Add)
 addExample2 = (+) @{right_type_lt} (val @{left_type_lt} 118) (val @{left_type_lt} 1219)
+
+data Mul e = MkMul e e
+
+instance Functor Mul where
+  map f (MkMul x y) = MkMul (f x) (f y)
+
+instance Eval Mul where
+  evalAlgebra (MkMul x y) = x * y
+
+(*) : ((:<:) Mul f) => Expr f -> Expr f -> Expr f
+x * y = inject (MkMul x y)
+
+mulExample : Expr ((:+:) Val ((:+:) Add Mul))
+mulExample = (+) @{right_type_lt @{left_type_lt}} ((*) @{right_type_lt @{right_type_lt}} (val @{left_type_lt} 80) (val @{left_type_lt} 5)) (val @{left_type_lt} 4)
