@@ -69,6 +69,18 @@
 
 \frame {
    \frametitle{С опциональной проверкой на тотальность}
+   \begin{align*}
+   &\mathbf{total}\ myHead : List\ a \rightarrow a\\
+   &myHead\ (x :: xs) = x\\
+   &\\
+   &> \text{Main.myHead is not total as there are missing cases}\\
+   &\\
+   &\%\mathbf{default}\ total\\
+   &go : Int\\
+   &go = go\\
+   &\\
+   &> \text{Main.go is possibly not total due to recursive path Main.go}\\
+   \end{align*}
 }
 
 \frame {
