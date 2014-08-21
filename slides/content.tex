@@ -46,6 +46,21 @@
 
 \frame {
    \frametitle{С зависимыми типами}
+   \begin{align*}
+   &\mathbf{data}\ MyVect : Nat \rightarrow (a : Type) \rightarrow Type\ \mathbf{where}\\
+   &\quad Nil : MyVect\ 0\ a\\
+   &\quad (::) : a \rightarrow MyVect\ n\ a \rightarrow MyVect\ (S\ n)\ a\\
+   &\\
+   &(\texttt{++}) : MyVect\ n\ a \rightarrow MyVect\ m\ a \rightarrow MyVect\ (n + m)\ a\\
+   &[]\ \texttt{++}\ ys = ys\\
+   &(x :: xs)\ \texttt{++}\ ys = x :: (xs\ \texttt{++}\ ys)\\
+   &\\
+   &\mathbf{infix}\ 9\ !!\\
+   &\\
+   &(!!) : MyVect\ n\ a \rightarrow Fin\ n \rightarrow a\\
+   &(x :: xs)\ !!\ fZ = x\\
+   &(x :: xs)\ !!\ (fS\ y) = xs\ !!\ y
+   \end{align*}
 }
 
 \frame {
