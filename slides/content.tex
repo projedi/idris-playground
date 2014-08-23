@@ -5,6 +5,7 @@
    \item с зависимыми типами,
    \item строгий по-умолчанию,
    \item с опциональной проверкой на тотальность,
+   \item с тактиками,
    \item \dots
    \end{itemize}
 }
@@ -80,6 +81,22 @@
    &go = go\\
    &\\
    &> \text{Main.go is possibly not total due to recursive path Main.go}\\
+   \end{align*}
+}
+
+\frame {
+   \frametitle{С тактиками}
+   \begin{align*}
+   &lemma\_applicative\_identity : (vs : MyList\ a) \rightarrow (pure\ id\ \texttt{<\$>}\ vs = vs)\\
+   &lemma\_applicative\_identity\ [] = refl\\
+   &lemma\_applicative\_identity\ (v :: vs) =\\
+   &\quad \mathbf{let}\ rec = lemma\_applicative\_identity\ vs\\
+   &\quad \mathbf{in}\ \texttt{?lemma\_applicative\_identity\_rhs}\\
+   &\\
+   &lemma\_applicative\_identity\_rhs = proof\\
+   &\quad \mathbf{intro}\ a,x,xs,rec\\
+   &\quad \mathbf{rewrite}\ rec\\
+   &\quad \mathbf{trivial}
    \end{align*}
 }
 
