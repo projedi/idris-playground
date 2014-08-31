@@ -117,4 +117,60 @@
 
 \frame {
    \frametitle{\dots}
+   \begin{itemize}
+   \item Effects вместо трансформеров
+         \[
+         f : \{\ [STDIO, STATE\ Int]\ \}\ Eff\ ()
+         \]
+   \item Именованные инстансы
+         \begin{align*}
+         &\mathbf{instance}\ [myord]\ Ord\ Int\ \mathbf{where}\\
+         &\quad \dots\\
+         &sort\ @\{myord\}\ [2, 1, 3]
+         \end{align*}
+   \item Idiom brackets(для аппликативных функторов)
+         \begin{align*}
+         &f : Maybe\ Int \rightarrow Maybe\ Int \rightarrow Maybe\ Int\\
+         &f\ x\ y = [| x + y |]
+         \end{align*}
+   \end{itemize}
+}
+
+\frame {
+   \frametitle{\dots}
+   \begin{itemize}
+   \item !-нотация(для монад)
+         \begin{align*}
+         &f : Maybe\ Bool \rightarrow Maybe\ a \rightarrow Maybe\ a \rightarrow Maybe\ a\\
+         &f\ x\ t\ f = \mathbf{if}\ !x\ \mathbf{then}\ t\ \mathbf{else}\ f
+         \end{align*}
+   \item Опциональная ленивость
+         \begin{align*}
+         &\mathbf{data}\ Lazy : Type \rightarrow Type\ \mathbf{where}\\
+         &\quad Delay : a \rightarrow Lazy\ a\\
+         &\\
+         &Force : Lazy\ a \rightarrow a
+         \end{align*}
+   \item Изменяемый синтаксис
+         \[
+         \mathbf{syntax}\ if\ [test]\ then\ [t]\ else\ [e] = boolElim\ test\ (Delay\ t)\ (Delay\ e)
+         \]
+   \end{itemize}
+}
+
+\frame {
+   \frametitle{\dots}
+   \begin{itemize}
+   \item \textbf{public}, \textbf{abstract}, \textbf{private} спецификаторы видимости
+      \begin{align*}
+      &\%\mathbf{access}\ public\\
+      &\mathbf{abstract}\ f : Int \rightarrow Int
+      \end{align*}
+   \item \textbf{record}s
+      \begin{align*}
+      &\mathbf{record}\ R : Type\ \mathbf{where}\\
+      &\quad MkR : (f1 : Int) \rightarrow (f2 : String) \rightarrow R
+      \end{align*}
+   \item Минимальный вывод типов в \textbf{where}
+   \end{itemize}
 }
