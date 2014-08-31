@@ -66,6 +66,21 @@
 
 \frame {
    \frametitle{Строгий по-умолчанию}
+   \begin{align*}
+   &broken : Int \rightarrow Int\\
+   &broken\ 0 = 1\\
+   &broken\ n = n * broken\ (n - 1)\\
+   &\\
+   &ifThenElse : Bool \rightarrow a \rightarrow a \rightarrow a\\
+   &ifThenElse\ True\ t\ \_ = t\\
+   &ifThenElse\ False\ \_\ f = f\\
+   &\\
+   &> ifThenElse\ True\ 0\ (broken\ (-1))\\
+   &\text{Интерпретатор:}\\
+   &\quad0 : Int\\
+   &\text{Скомпилированный код(с точностью до оптимизаций):}\\
+   &\quad\texttt{segmentation fault ./a.out}\\
+   \end{align*}
 }
 
 \frame {
