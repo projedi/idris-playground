@@ -38,7 +38,7 @@
    &\quad (x :: xs)\ \texttt{>>=}\ f = f\ x\ \texttt{++}\ (xs\ \texttt{>>=}\ f)\\
    &\\
    &test : MyList\ Int\\
-   &test = do\\
+   &test = \mathbf{do}\\
    &\quad f \leftarrow [id, (*2)]\\
    &\quad x \leftarrow [3, 4]\\
    &\quad return\ \$\ f\ x
@@ -161,6 +161,20 @@
 \frame {
    \frametitle{\dots}
    \begin{itemize}
+   \item Минимальный вывод типов в \textbf{where}
+   \item Гетерогенное равенство
+      \begin{align*}
+      &\mathbf{data}\ (=) : a \rightarrow b \rightarrow Type\ \mathbf{where}\\
+      &\quad refl : x = x
+      \end{align*}
+   \item Type providers
+      TODO
+   \end{itemize}
+}
+
+\frame {
+   \frametitle{\dots}
+   \begin{itemize}
    \item \textbf{public}, \textbf{abstract}, \textbf{private} спецификаторы видимости
       \begin{align*}
       &\%\mathbf{access}\ public\\
@@ -170,18 +184,6 @@
       \begin{align*}
       &\mathbf{record}\ R : Type\ \mathbf{where}\\
       &\quad MkR : (f1 : Int) \rightarrow (f2 : String) \rightarrow R
-      \end{align*}
-   \item Минимальный вывод типов в \textbf{where}
-   \end{itemize}
-}
-
-\frame {
-   \frametitle{\dots}
-   \begin{itemize}
-   \item Гетерогенное равенство
-      \begin{align*}
-      &\mathbf{data}\ (=) : a \rightarrow b \rightarrow Type\ \mathbf{where}\\
-      &\quad refl : x = x
       \end{align*}
    \end{itemize}
 }
