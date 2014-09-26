@@ -167,8 +167,6 @@
       &\mathbf{data}\ (=) : a \rightarrow b \rightarrow Type\ \mathbf{where}\\
       &\quad refl : x = x
       \end{align*}
-   \item Type providers %TODO: Can be a topic in itself
-      TODO
    \item FFI with C
       TODO
    \end{itemize}
@@ -192,6 +190,25 @@
    \item auto implicit args
       TODO
    \end{itemize}
+}
+
+\frame {
+   \frametitle{Type providers} %TODO: Can be a topic in itself
+   \begin{align*}
+   &\%\mathbf{language}\ TypeProviders\\
+   \\
+   &strToType : String \to Type\\
+   &strToType\ ``Int`` = Int\\
+   &strToType\ \_ = Nat\\
+   \\
+   &fromFile : String \to IO\ (Provider\ Type)\\
+   &fromFile\ fname = Provide\ (strToType\ (trim\ !(readFile\ fname)))\\
+   \\
+   &\%\mathbf{provide}\ (T : Type)\ \mathbf{with}\ fromFile\ ``config.h``\\
+   \\
+   &f : T\\
+   &f = 42
+   \end{align*}
 }
 
 \frame {
