@@ -15,7 +15,7 @@
    \begin{align*}
    &\mathbf{data}\ MyList\ a\ = Nil\ |\ (::)\ a\ (MyList\ a)\\
    &\\
-   &(\texttt{++}) : MyList\ a \rightarrow MyList\ a \rightarrow MyList\ a\\
+   &(\texttt{++}) : MyList\ a \to MyList\ a \to MyList\ a\\
    &[]\ \texttt{++}\ ys = ys\\
    &(x :: xs)\ \texttt{++}\ ys = x :: (xs\ \texttt{++}\ ys)\\
    &\\
@@ -48,17 +48,17 @@
 \frame {
    \frametitle{С зависимыми типами}
    \begin{align*}
-   &\mathbf{data}\ MyVect : Nat \rightarrow (a : Type) \rightarrow Type\ \mathbf{where}\\
+   &\mathbf{data}\ MyVect : Nat \to (a : Type) \to Type\ \mathbf{where}\\
    &\quad Nil : MyVect\ 0\ a\\
-   &\quad (::) : a \rightarrow MyVect\ n\ a \rightarrow MyVect\ (S\ n)\ a\\
+   &\quad (::) : a \to MyVect\ n\ a \to MyVect\ (S\ n)\ a\\
    &\\
-   &(\texttt{++}) : MyVect\ n\ a \rightarrow MyVect\ m\ a \rightarrow MyVect\ (n + m)\ a\\
+   &(\texttt{++}) : MyVect\ n\ a \to MyVect\ m\ a \to MyVect\ (n + m)\ a\\
    &[]\ \texttt{++}\ ys = ys\\
    &(x :: xs)\ \texttt{++}\ ys = x :: (xs\ \texttt{++}\ ys)\\
    &\\
    &\mathbf{infix}\ 9\ !!\\
    &\\
-   &(!!) : MyVect\ n\ a \rightarrow Fin\ n \rightarrow a\\
+   &(!!) : MyVect\ n\ a \to Fin\ n \to a\\
    &(x :: xs)\ !!\ fZ = x\\
    &(x :: xs)\ !!\ (fS\ y) = xs\ !!\ y
    \end{align*}
@@ -67,11 +67,11 @@
 \frame {
    \frametitle{Строгий по-умолчанию}
    \begin{align*}
-   &broken : Int \rightarrow Int\\
+   &broken : Int \to Int\\
    &broken\ 0 = 1\\
    &broken\ n = n * broken\ (n - 1)\\
    &\\
-   &ifThenElse : Bool \rightarrow a \rightarrow a \rightarrow a\\
+   &ifThenElse : Bool \to a \to a \to a\\
    &ifThenElse\ True\ t\ \_ = t\\
    &ifThenElse\ False\ \_\ f = f\\
    &\\
@@ -86,7 +86,7 @@
 \frame {
    \frametitle{С опциональной проверкой на тотальность}
    \begin{align*}
-   &\mathbf{total}\ myHead : List\ a \rightarrow a\\
+   &\mathbf{total}\ myHead : List\ a \to a\\
    &myHead\ (x :: xs) = x\\
    &\\
    &> \text{Main.myHead is not total as there are missing cases}\\
@@ -102,7 +102,7 @@
 \frame {
    \frametitle{С тактиками}
    \begin{align*}
-   &lemma\_applicative\_identity : (vs : MyList\ a) \rightarrow (pure\ id\ \texttt{<\$>}\ vs = vs)\\
+   &lemma\_applicative\_identity : (vs : MyList\ a) \to (pure\ id\ \texttt{<\$>}\ vs = vs)\\
    &lemma\_applicative\_identity\ [] = refl\\
    &lemma\_applicative\_identity\ (v :: vs) =\\
    &\quad \mathbf{let}\ rec = lemma\_applicative\_identity\ vs\\
@@ -130,7 +130,7 @@
          \end{align*}
    \item Idiom brackets(для аппликативных функторов)
          \begin{align*}
-         &f : Maybe\ Int \rightarrow Maybe\ Int \rightarrow Maybe\ Int\\
+         &f : Maybe\ Int \to Maybe\ Int \to Maybe\ Int\\
          &f\ x\ y = [| x + y |]
          \end{align*}
    \end{itemize}
@@ -141,15 +141,15 @@
    \begin{itemize}
    \item !-нотация(для монад)
          \begin{align*}
-         &f : Maybe\ Bool \rightarrow Maybe\ a \rightarrow Maybe\ a \rightarrow Maybe\ a\\
+         &f : Maybe\ Bool \to Maybe\ a \to Maybe\ a \to Maybe\ a\\
          &f\ x\ t\ f = \mathbf{if}\ !x\ \mathbf{then}\ t\ \mathbf{else}\ f
          \end{align*}
    \item Опциональная ленивость
          \begin{align*}
-         &\mathbf{data}\ Lazy : Type \rightarrow Type\ \mathbf{where}\\
-         &\quad Delay : a \rightarrow Lazy\ a\\
+         &\mathbf{data}\ Lazy : Type \to Type\ \mathbf{where}\\
+         &\quad Delay : a \to Lazy\ a\\
          &\\
-         &Force : Lazy\ a \rightarrow a
+         &Force : Lazy\ a \to a
          \end{align*}
    \item Изменяемый синтаксис
          \[
@@ -164,7 +164,7 @@
    \item Минимальный вывод типов в \textbf{where}
    \item Гетерогенное равенство
       \begin{align*}
-      &\mathbf{data}\ (=) : a \rightarrow b \rightarrow Type\ \mathbf{where}\\
+      &\mathbf{data}\ (=) : a \to b \to Type\ \mathbf{where}\\
       &\quad refl : x = x
       \end{align*}
    \item FFI with C
@@ -178,12 +178,12 @@
    \item \textbf{public}, \textbf{abstract}, \textbf{private} спецификаторы видимости
       \begin{align*}
       &\%\mathbf{access}\ public\\
-      &\mathbf{abstract}\ f : Int \rightarrow Int
+      &\mathbf{abstract}\ f : Int \to Int
       \end{align*}
    \item \textbf{record}s
       \begin{align*}
       &\mathbf{record}\ R : Type\ \mathbf{where}\\
-      &\quad MkR : (f1 : Int) \rightarrow (f2 : String) \rightarrow R
+      &\quad MkR : (f1 : Int) \to (f2 : String) \to R
       \end{align*}
    \item Levels are implicit
       TODO
