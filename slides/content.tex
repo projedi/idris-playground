@@ -10,206 +10,209 @@
    \end{itemize}
 }
 
-\frame {
+\begin{frame}[fragile]
    \frametitle{Haskellоподобный}
-   \begin{align*}
-   &\mathbf{data}\ MyList\ a\ = Nil\ |\ (::)\ a\ (MyList\ a)\\
-   &\\
-   &(\texttt{++}) : MyList\ a \to MyList\ a \to MyList\ a\\
-   &[]\ \texttt{++}\ ys = ys\\
-   &(x :: xs)\ \texttt{++}\ ys = x :: (xs\ \texttt{++}\ ys)\\
-   &\\
-   &\mathbf{instance}\ Functor\ MyList\ \mathbf{where}\\
-   &\quad map\ f\ Nil = Nil\\
-   &\quad map\ f\ (x :: xs) = f\ x :: map\ f\ xs\\
-   \end{align*}
-}
+   \begin{lstlisting}
+data MyList a = Nil | (::) a (MyList a)
 
-\frame {
+(++) : MyList a -> MyList a -> MyList a
+[] ++ ys = ys
+(x :: xs) ++ ys = x :: (xs ++ ys)
+
+instance Functor MyList where
+   map f Nil = Nil
+   map f (x :: xs) =f x :: map f xs
+   \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
    \frametitle{Haskellоподобный}
-   \begin{align*}
-   &\mathbf{instance}\ Applicative\ MyList\ \mathbf{where}\\
-   &\quad pure\ x = [x]\\
-   &\quad []\ \texttt{<\$>}\ \_ = []\\
-   &\quad (f :: fs)\ \texttt{<\$>}\ xs = map\ f\ xs\ \texttt{++}\ (fs\ \texttt{<\$>}\ xs)\\
-   &\\
-   &\mathbf{instance}\ Monad\ MyList\ \mathbf{where}\\
-   &\quad [] \bind \_ = []\\
-   &\quad (x :: xs) \bind f = f\ x\ \texttt{++}\ (xs \bind f)\\
-   &\\
-   &test : MyList\ Int\\
-   &test = \mathbf{do}\\
-   &\quad f \leftarrow [id, (*2)]\\
-   &\quad x \leftarrow [3, 4]\\
-   &\quad return\ \$\ f\ x
-   \end{align*}
-}
+   \begin{lstlisting}
+instance Applicative MyList where
+   pure x = [x]
+   [] <$> _ = []
+   (f :: fs) <$> xs = map f xs ++ (fs <$> xs)
 
-\frame {
+instance Monad MyList where
+   [] >>= _ = []
+   (x :: xs) >>= f = f x ++ (xs >>= f)
+
+test : MyList Int
+test = do
+   f <- [id, (*2)]
+   x <- [3, 4]
+   return $ f x
+   \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
    \frametitle{С зависимыми типами}
-   \begin{align*}
-   &\mathbf{data}\ MyVect : Nat \to (a : Type) \to Type\ \mathbf{where}\\
-   &\quad Nil : MyVect\ 0\ a\\
-   &\quad (::) : a \to MyVect\ n\ a \to MyVect\ (S\ n)\ a\\
-   &\\
-   &(\texttt{++}) : MyVect\ n\ a \to MyVect\ m\ a \to MyVect\ (n + m)\ a\\
-   &[]\ \texttt{++}\ ys = ys\\
-   &(x :: xs)\ \texttt{++}\ ys = x :: (xs\ \texttt{++}\ ys)\\
-   &\\
-   &\mathbf{infix}\ 9\ !!\\
-   &\\
-   &(!!) : MyVect\ n\ a \to Fin\ n \to a\\
-   &(x :: xs)\ !!\ fZ = x\\
-   &(x :: xs)\ !!\ (fS\ y) = xs\ !!\ y
-   \end{align*}
-}
+   \begin{lstlisting}
+data MyVect : Nat -> (a : Type) -> Type where
+   Nil : MyVect 0 a
+   (::) : a -> MyVect n a -> MyVect (S n) a
 
-\frame {
+(++) : MyVect n a -> MyVect m a -> MyVect (n + m) a
+[] ++ ys = ys
+(x :: xs) ++ ys = x :: (xs ++ ys)
+
+infix 9 !!
+
+(!!) : MyVect n a -> Fin n -> a
+(x :: xs) !! fZ = x
+(x :: xs) !! (fS y) = xs !! y
+   \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
    \frametitle{Строгий по-умолчанию}
-   \begin{align*}
-   &broken : Int \to Int\\
-   &broken\ 0 = 1\\
-   &broken\ n = n * broken\ (n - 1)\\
-   &\\
-   &ifThenElse : Bool \to a \to a \to a\\
-   &ifThenElse\ True\ t\ \_ = t\\
-   &ifThenElse\ False\ \_\ f = f\\
-   &\\
-   &> ifThenElse\ True\ 0\ (broken\ (-1))\\
-   &\text{Интерпретатор:}\\
-   &\quad0 : Int\\
-   &\text{Скомпилированный код(с точностью до оптимизаций):}\\
-   &\quad\texttt{segmentation fault ./a.out}\\
-   \end{align*}
-}
+   \begin{lstlisting}
+broken : Int -> Int
+broken 0 = 1
+broken n = n * broken (n - 1)
 
-\frame {
+ifThenElse : Bool -> a -> a -> a
+ifThenElse True t _ = t
+ifThenElse False _ f = f
+   \end{lstlisting}
+   \begin{lstlisting}
+> ifThenElse True 0 (broken (-1))
+   \end{lstlisting}
+   Интерпретатор:
+   \begin{lstlisting}
+0 : Int
+   \end{lstlisting}
+   Скомпилированный код (с точностью до оптимизаций):\\
+   \texttt{segmentation fault ./a.out}
+\end{frame}
+
+\begin{frame}[fragile]
    \frametitle{С опциональной проверкой на тотальность}
-   \begin{align*}
-   &\mathbf{total}\ myHead : List\ a \to a\\
-   &myHead\ (x :: xs) = x\\
-   &\\
-   &> \text{Main.myHead is not total as there are missing cases}\\
-   &\\
-   &\%\mathbf{default}\ total\\
-   &go : Int\\
-   &go = go\\
-   &\\
-   &> \text{Main.go is possibly not total due to recursive path Main.go}\\
-   \end{align*}
-}
+   \begin{lstlisting}
+total myHead : List a -> a
+myHead (x :: xs) = x
+   \end{lstlisting}
+   \texttt{Main.myHead is not total as there are missing cases}
+   \begin{lstlisting}
+%default total
+go : Int
+go = go
+   \end{lstlisting}
+   \texttt{Main.go is possibly not total due to recursive path Main.go}
+\end{frame}
 
-\frame {
+\begin{frame}[fragile]
    \frametitle{С тактиками}
-   \begin{align*}
-   &lemma\_applicative\_identity : (vs : MyList\ a) \to (pure\ id\ \texttt{<\$>}\ vs = vs)\\
-   &lemma\_applicative\_identity\ [] = refl\\
-   &lemma\_applicative\_identity\ (v :: vs) =\\
-   &\quad \mathbf{let}\ rec = lemma\_applicative\_identity\ vs\\
-   &\quad \mathbf{in}\ \texttt{?lemma\_applicative\_identity\_rhs}\\
-   &\\
-   &lemma\_applicative\_identity\_rhs = proof\\
-   &\quad \mathbf{intro}\ a,x,xs,rec\\
-   &\quad \mathbf{rewrite}\ rec\\
-   &\quad \mathbf{trivial}
-   \end{align*}
-}
+   \begin{lstlisting}
+lemma_applicative_identity :  (vs : MyList a)
+                           -> (pure id <$> vs = vs)
+lemma_applicative_identity [] = refl
+lemma_applicative_identity (v ::vs) =
+   let rec = lemma_applicative_identity vs
+   in ?lemma_applicative_identity_rhs
 
-\frame {
+lemma_applicative_identity_rhs = proof
+   intro a,x,xs,rec
+   rewrite rec
+   trivial
+   \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
    \frametitle{\dots}
    \begin{itemize}
    \item Effects вместо трансформеров %TODO: Can be a topic in itself
-         \[
-         f : \{\ [STDIO, STATE\ Int]\ \}\ Eff\ ()
-         \]
+         \begin{lstlisting}
+f : { [STDIO, STATE Int] } Eff ()
+         \end{lstlisting}
    \item Именованные инстансы
-         \begin{align*}
-         &\mathbf{instance}\ [myord]\ Ord\ Int\ \mathbf{where}\\
-         &\quad \dots\\
-         &sort\ @\{myord\}\ [2, 1, 3]
-         \end{align*}
+         \begin{lstlisting}
+instance [myord] Ord Int where
+   ...
+sort @{myord} [2, 1, 3]
+         \end{lstlisting}
    \item Idiom brackets(для аппликативных функторов)
-         \begin{align*}
-         &f : Maybe\ Int \to Maybe\ Int \to Maybe\ Int\\
-         &f\ x\ y = [| x + y |]
-         \end{align*}
+         \begin{lstlisting}
+f : Maybe Int -> Maybe Int -> Maybe Int
+f x y = [| x + y |]
+         \end{lstlisting}
    \end{itemize}
-}
+\end{frame}
 
-\frame {
+\begin{frame}[fragile]
    \frametitle{\dots}
    \begin{itemize}
    \item !-нотация(для монад)
-         \begin{align*}
-         &f : Maybe\ Bool \to Maybe\ a \to Maybe\ a \to Maybe\ a\\
-         &f\ x\ t\ f = \mathbf{if}\ !x\ \mathbf{then}\ t\ \mathbf{else}\ f
-         \end{align*}
+         \begin{lstlisting}
+f : Maybe Bool -> Maybe a -> Maybe a -> Maybe a
+f x t f = if !x then t else f
+         \end{lstlisting}
    \item Опциональная ленивость
-         \begin{align*}
-         &\mathbf{data}\ Lazy : Type \to Type\ \mathbf{where}\\
-         &\quad Delay : a \to Lazy\ a\\
-         &\\
-         &Force : Lazy\ a \to a
-         \end{align*}
-   \item Изменяемый синтаксис
-         \[
-         \mathbf{syntax}\ if\ [test]\ then\ [t]\ else\ [e] = boolElim\ test\ (Delay\ t)\ (Delay\ e)
-         \]
-   \end{itemize}
-}
+         \begin{lstlisting}
+data Lazy : Type -> Type where
+   Delay : a -> Lazy a
 
-\frame {
+Force : Lazy a -> a
+         \end{lstlisting}
+   \item Изменяемый синтаксис
+         \begin{lstlisting}
+syntax if [test] then [t] else [e] = boolElim test (Delay t) (Delay e)
+         \end{lstlisting}
+   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
    \frametitle{\dots}
    \begin{itemize}
    \item Минимальный вывод типов в \textbf{where}
    \item Гетерогенное равенство
-      \begin{align*}
-      &\mathbf{data}\ (=) : a \to b \to Type\ \mathbf{where}\\
-      &\quad refl : x = x
-      \end{align*}
+      \begin{lstlisting}
+data (=) : a -> b -> Type where
+   refl : x = x
+      \end{lstlisting}
    \item FFI with C
       TODO
    \end{itemize}
-}
+\end{frame}
 
-\frame {
+\begin{frame}[fragile]
    \frametitle{\dots}
    \begin{itemize}
    \item \textbf{public}, \textbf{abstract}, \textbf{private} спецификаторы видимости
-      \begin{align*}
-      &\%\mathbf{access}\ public\\
-      &\mathbf{abstract}\ f : Int \to Int
-      \end{align*}
+      \begin{lstlisting}
+%access public
+abstract f : Int -> Int
+      \end{lstlisting}
    \item \textbf{record}s
-      \begin{align*}
-      &\mathbf{record}\ R : Type\ \mathbf{where}\\
-      &\quad MkR : (f1 : Int) \to (f2 : String) \to R
-      \end{align*}
+      \begin{lstlisting}
+record R : Type where
+   MkR : (f1 : Int) -> (f2 : String) -> R
+      \end{lstlisting}
    \item Levels are implicit
       TODO
    \item auto implicit args
       TODO
    \end{itemize}
-}
+\end{frame}
 
-\frame {
+\begin{frame}[fragile]
    \frametitle{Type providers} %TODO: Can be a topic in itself
-   \begin{align*}
-   &\%\mathbf{language}\ TypeProviders\\
-   \\
-   &strToType : String \to Type\\
-   &strToType\ ``Int`` = Int\\
-   &strToType\ \_ = Nat\\
-   \\
-   &fromFile : String \to IO\ (Provider\ Type)\\
-   &fromFile\ fname = Provide\ (strToType\ (trim\ !(readFile\ fname)))\\
-   \\
-   &\%\mathbf{provide}\ (T : Type)\ \mathbf{with}\ fromFile\ ``config.h``\\
-   \\
-   &f : T\\
-   &f = 42
-   \end{align*}
-}
+   \begin{lstlisting}
+%language TypeProviders
+
+strToType : String -> Type
+strToType "Int" = Int
+strToType _ = Nat
+
+fromFile : String -> IO (Provider Type)
+fromFile fname = Provide (strToType (trim !(readFile fname)))
+
+%provide (T : Type) with fromFile "config.h"
+
+f : T
+f = 42
+   \end{lstlisting}
+\end{frame}
 
 \frame {
    \frametitle{TODOs}
