@@ -22,7 +22,7 @@
 data MyList a = Nil | (::) a (MyList a)
 
 (++) : MyList a -> MyList a -> MyList a
-[] ++ ys = ys
+Nil ++ ys = ys
 (x :: xs) ++ ys = x :: (xs ++ ys)
 
 instance Functor MyList where
@@ -34,11 +34,14 @@ instance Functor MyList where
 \begin{frame}[fragile]
    \frametitle{Haskellоподобный}
    \lstset{
-      emph={Applicative, Int, Monad, MyList},
+      emph={Applicative, Int, Nil, Monad, MyList},
       emphstyle=\color{typecolor},
       emph={[2]id, map, pure, return, test},
       emphstyle={[2]\color{namecolor}},
    }
+   \begin{lstlisting}[frame=single]
+data MyList a = Nil | (::) a (MyList a)
+   \end{lstlisting}
    \begin{lstlisting}
 instance Applicative MyList where
    pure x = [x]
@@ -152,18 +155,13 @@ lemma_applicative_identity_rhs = proof
 
 \begin{frame}[fragile]
    \frametitle{\dots}
-   %TODO: What are STDIO & co? types or not
    \lstset{
-      emph={Eff, Int, Maybe, Ord, STDIO, STATE},
+      emph={Int, Maybe, Ord},
       emphstyle=\color{typecolor},
-      emph={[2]f, myord, sort},
+      emph={[2]myord, sort},
       emphstyle={[2]\color{namecolor}},
    }
    \begin{itemize}
-   \item Effects вместо трансформеров %TODO: Can be a topic in itself
-         \begin{lstlisting}
-f : { [STDIO, STATE Int] } Eff ()
-         \end{lstlisting}
    \item Именованные инстансы
          \begin{lstlisting}
 instance [myord] Ord Int where
@@ -251,6 +249,20 @@ record R : Type where
    \item auto implicit args
       TODO
    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+   \frametitle{Effects вместо трансформеров}%TODO: Can be a topic in itself
+   %TODO: What are STDIO & co? types or not
+   \lstset{
+      emph={Eff, Int, STDIO, STATE},
+      emphstyle=\color{typecolor},
+      emph={[2]f},
+      emphstyle={[2]\color{namecolor}},
+   }
+   \begin{lstlisting}
+f : { [STDIO, STATE Int] } Eff ()
+   \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
