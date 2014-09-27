@@ -12,6 +12,12 @@
 
 \begin{frame}[fragile]
    \frametitle{Haskellоподобный}
+   \lstset{
+      emph={Functor, MyList, Nil},
+      emphstyle=\color{typecolor},
+      emph={[2]map},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{lstlisting}
 data MyList a = Nil | (::) a (MyList a)
 
@@ -21,12 +27,18 @@ data MyList a = Nil | (::) a (MyList a)
 
 instance Functor MyList where
    map f Nil = Nil
-   map f (x :: xs) =f x :: map f xs
+   map f (x :: xs) = f x :: map f xs
    \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
    \frametitle{Haskellоподобный}
+   \lstset{
+      emph={Applicative, Int, Monad, MyList},
+      emphstyle=\color{typecolor},
+      emph={[2]id, map, pure, return, test},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{lstlisting}
 instance Applicative MyList where
    pure x = [x]
@@ -47,6 +59,12 @@ test = do
 
 \begin{frame}[fragile]
    \frametitle{С зависимыми типами}
+   \lstset{
+      emph={Fin, MyVect, Nat, Nil, Type, fZ, fS},
+      emphstyle=\color{typecolor},
+      emph={[2]},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{lstlisting}
 data MyVect : Nat -> (a : Type) -> Type where
    Nil : MyVect 0 a
@@ -66,6 +84,12 @@ infix 9 !!
 
 \begin{frame}[fragile]
    \frametitle{Строгий по-умолчанию}
+   \lstset{
+      emph={Bool, False, Int, True},
+      emphstyle=\color{typecolor},
+      emph={[2]broken, ifThenElse},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{lstlisting}
 broken : Int -> Int
 broken 0 = 1
@@ -75,19 +99,21 @@ ifThenElse : Bool -> a -> a -> a
 ifThenElse True t _ = t
 ifThenElse False _ f = f
    \end{lstlisting}
-   \begin{lstlisting}
-> ifThenElse True 0 (broken (-1))
-   \end{lstlisting}
-   Интерпретатор:
-   \begin{lstlisting}
-0 : Int
-   \end{lstlisting}
+   \texttt{> ifThenElse True 0 (broken (-1))}\\\vspace{0.5em}
+   Интерпретатор:\\
+   \texttt{0 : Int}\\\vspace{0.5em}
    Скомпилированный код (с точностью до оптимизаций):\\
    \texttt{segmentation fault ./a.out}
 \end{frame}
 
 \begin{frame}[fragile]
    \frametitle{С опциональной проверкой на тотальность}
+   \lstset{
+      emph={Int, List},
+      emphstyle=\color{typecolor},
+      emph={[2]go, myHead},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{lstlisting}
 total myHead : List a -> a
 myHead (x :: xs) = x
@@ -103,11 +129,17 @@ go = go
 
 \begin{frame}[fragile]
    \frametitle{С тактиками}
+   \lstset{
+      emph={MyList, refl},
+      emphstyle=\color{typecolor},
+      emph={[2]id, lemma_applicative_identity, lemma_applicative_identity_rhs, pure},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{lstlisting}
 lemma_applicative_identity :  (vs : MyList a)
                            -> (pure id <$> vs = vs)
 lemma_applicative_identity [] = refl
-lemma_applicative_identity (v ::vs) =
+lemma_applicative_identity (v :: vs) =
    let rec = lemma_applicative_identity vs
    in ?lemma_applicative_identity_rhs
 
@@ -120,6 +152,13 @@ lemma_applicative_identity_rhs = proof
 
 \begin{frame}[fragile]
    \frametitle{\dots}
+   %TODO: What are STDIO & co? types or not
+   \lstset{
+      emph={Eff, Int, Maybe, Ord, STDIO, STATE},
+      emphstyle=\color{typecolor},
+      emph={[2]f, myord, sort},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{itemize}
    \item Effects вместо трансформеров %TODO: Can be a topic in itself
          \begin{lstlisting}
@@ -141,11 +180,17 @@ f x y = [| x + y |]
 
 \begin{frame}[fragile]
    \frametitle{\dots}
+   \lstset{
+      emph={Bool, Delay, Lazy, Maybe, Type},
+      emphstyle=\color{typecolor},
+      emph={[2]Force, boolElim, g},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{itemize}
    \item !-нотация(для монад)
          \begin{lstlisting}
-f : Maybe Bool -> Maybe a -> Maybe a -> Maybe a
-f x t f = if !x then t else f
+g : Maybe Bool -> Maybe a -> Maybe a -> Maybe a
+g x t f = if !x then t else f
          \end{lstlisting}
    \item Опциональная ленивость
          \begin{lstlisting}
@@ -163,8 +208,14 @@ syntax if [test] then [t] else [e] = boolElim test (Delay t) (Delay e)
 
 \begin{frame}[fragile]
    \frametitle{\dots}
+   \lstset{
+      emph={Type},
+      emphstyle=\color{typecolor},
+      emph={[2]},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{itemize}
-   \item Минимальный вывод типов в \textbf{where}
+   \item Минимальный вывод типов в \texttt{\color{kwcolor}where}
    \item Гетерогенное равенство
       \begin{lstlisting}
 data (=) : a -> b -> Type where
@@ -177,13 +228,20 @@ data (=) : a -> b -> Type where
 
 \begin{frame}[fragile]
    \frametitle{\dots}
+   \lstset{
+      emph={Int, MkR, R, String, Type},
+      emphstyle=\color{typecolor},
+      emph={[2]f},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{itemize}
-   \item \textbf{public}, \textbf{abstract}, \textbf{private} спецификаторы видимости
+   \item \texttt{\color{kwcolor}public}, \texttt{\color{kwcolor}abstract},
+         \texttt{\color{kwcolor}private} спецификаторы видимости
       \begin{lstlisting}
 %access public
 abstract f : Int -> Int
       \end{lstlisting}
-   \item \textbf{record}s
+   \item \texttt{\color{kwcolor}record}s
       \begin{lstlisting}
 record R : Type where
    MkR : (f1 : Int) -> (f2 : String) -> R
@@ -197,6 +255,12 @@ record R : Type where
 
 \begin{frame}[fragile]
    \frametitle{Type providers} %TODO: Can be a topic in itself
+   \lstset{
+      emph={Provide, Provider, IO, Int, Nat, Type, String},
+      emphstyle=\color{typecolor},
+      emph={[2]f, fromFile, strToType, trim, readFile},
+      emphstyle={[2]\color{namecolor}},
+   }
    \begin{lstlisting}
 %language TypeProviders
 

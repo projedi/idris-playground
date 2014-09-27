@@ -10,16 +10,28 @@
 \usepackage{bussproofs}
 \usepackage{multirow}
 \usepackage{mathtools}
+\usepackage{color}
 \usepackage{listings}
+
+\usepackage{idris}
 
 \usecolortheme{orchid}
 
 \hypersetup{pdfstartview={FitH}}
 
+\definecolor{kwcolor}{RGB}{0,127,0}
+\definecolor{strcolor}{RGB}{127,127,0}
+\definecolor{typecolor}{RGB}{255,64,64}
+\definecolor{namecolor}{RGB}{64,64,255}
+
 \lstset{%
-   language=Haskell,
-   basicstyle=\footnotesize,
-   breaklines=true
+   language=Idris,
+   breaklines=true,
+   basicstyle=\ttfamily\footnotesize,
+   identifierstyle=,
+   commentstyle=,
+   stringstyle=\color{strcolor},
+   keywordstyle=\color{kwcolor}
 }
 
 \title{Idris}
