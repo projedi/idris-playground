@@ -34,8 +34,8 @@
    &\quad (f :: fs)\ \texttt{<\$>}\ xs = map\ f\ xs\ \texttt{++}\ (fs\ \texttt{<\$>}\ xs)\\
    &\\
    &\mathbf{instance}\ Monad\ MyList\ \mathbf{where}\\
-   &\quad []\ \texttt{>>=}\ \_ = []\\
-   &\quad (x :: xs)\ \texttt{>>=}\ f = f\ x\ \texttt{++}\ (xs\ \texttt{>>=}\ f)\\
+   &\quad [] \bind \_ = []\\
+   &\quad (x :: xs) \bind f = f\ x\ \texttt{++}\ (xs \bind f)\\
    &\\
    &test : MyList\ Int\\
    &test = \mathbf{do}\\
