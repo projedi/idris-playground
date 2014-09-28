@@ -155,7 +155,7 @@ syntax if [test] then [t] else [e] = boolElim test (Delay t) (Delay e)
 \begin{frame}[fragile]
    \frametitle{\dots}
    \lstset{
-      emph={Type},
+      emph={Type, refl},
       emphstyle=\color{typecolor},
       emph={[2]},
       emphstyle={[2]\color{namecolor}},
@@ -175,9 +175,9 @@ data (=) : a -> b -> Type where
 \begin{frame}[fragile]
    \frametitle{\dots}
    \lstset{
-      emph={Int, MkR, R, String, Type},
+      emph={Int, MkR, R, String, Type, refl},
       emphstyle=\color{typecolor},
-      emph={[2]f},
+      emph={[2]f, myCast},
       emphstyle={[2]\color{namecolor}},
    }
    \begin{itemize}
@@ -192,10 +192,8 @@ abstract f : Int -> Int
 record R : Type where
    MkR : (f1 : Int) -> (f2 : String) -> R
       \end{lstlisting}
-   \item Levels are implicit
-      TODO
-   \item auto implicit args
-      TODO
+   \item \texttt{\color{kwcolor}auto}
+      \lstinputlisting[firstline=3]{autoimplicit.idr}
    \end{itemize}
 \end{frame}
 
@@ -211,6 +209,7 @@ record R : Type where
    \begin{lstlisting}
 f : { [STDIO, STATE Int] } Eff ()
    \end{lstlisting}
+   TODO: Moar
 \end{frame}
 
 \begin{frame}[fragile]
