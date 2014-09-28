@@ -3,8 +3,8 @@
    \begin{itemize}
    \item Haskellоподобный,
    \item с зависимыми типами,
-   \item строгий по-умолчанию,
    \item с опциональной проверкой на тотальность,
+   \item строгий по-умолчанию,
    \item с тактиками,
    \item \dots
    \end{itemize}
@@ -86,6 +86,36 @@ infix 9 !!
 \end{frame}
 
 \begin{frame}[fragile]
+   \frametitle{С опциональной проверкой на тотальность}
+   \lstset{
+      emph={Int, List},
+      emphstyle=\color{typecolor},
+      emph={[2]go, myHead},
+      emphstyle={[2]\color{namecolor}},
+   }
+   \begin{lstlisting}
+total myHead : List a -> a
+myHead (x :: xs) = x
+   \end{lstlisting}
+   \texttt{Main.myHead is not total as there are missing cases}
+   \vspace{\baselineskip}
+
+   \begin{lstlisting}
+%default total
+go : Int
+go = go
+   \end{lstlisting}
+   \texttt{Main.go is possibly not total due to recursive path Main.go}
+   \vspace{\baselineskip}
+
+   В интерпретаторе:\\
+   \texttt{> :total f}
+   \vspace{\baselineskip}
+
+   В типах вычисляются только тотальные функции.
+\end{frame}
+
+\begin{frame}[fragile]
    \frametitle{Строгий по-умолчанию}
    \lstset{
       emph={Bool, False, Int, True},
@@ -107,27 +137,6 @@ ifThenElse False _ f = f
    \texttt{0 : Int}\\\vspace{0.5em}
    Скомпилированный код (с точностью до оптимизаций):\\
    \texttt{segmentation fault ./a.out}
-\end{frame}
-
-\begin{frame}[fragile]
-   \frametitle{С опциональной проверкой на тотальность}
-   \lstset{
-      emph={Int, List},
-      emphstyle=\color{typecolor},
-      emph={[2]go, myHead},
-      emphstyle={[2]\color{namecolor}},
-   }
-   \begin{lstlisting}
-total myHead : List a -> a
-myHead (x :: xs) = x
-   \end{lstlisting}
-   \texttt{Main.myHead is not total as there are missing cases}
-   \begin{lstlisting}
-%default total
-go : Int
-go = go
-   \end{lstlisting}
-   \texttt{Main.go is possibly not total due to recursive path Main.go}
 \end{frame}
 
 \begin{frame}[fragile]
