@@ -18,17 +18,7 @@
       emph={[2]map},
       emphstyle={[2]\color{namecolor}},
    }
-   \begin{lstlisting}
-data MyList a = Nil | (::) a (MyList a)
-
-(++) : MyList a -> MyList a -> MyList a
-Nil ++ ys = ys
-(x :: xs) ++ ys = x :: (xs ++ ys)
-
-instance Functor MyList where
-   map f Nil = Nil
-   map f (x :: xs) = f x :: map f xs
-   \end{lstlisting}
+   \lstinputlisting[firstline=3, lastline=11]{mylist.idr}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -39,25 +29,8 @@ instance Functor MyList where
       emph={[2]id, map, pure, return, test},
       emphstyle={[2]\color{namecolor}},
    }
-   \begin{lstlisting}[frame=single]
-data MyList a = Nil | (::) a (MyList a)
-   \end{lstlisting}
-   \begin{lstlisting}
-instance Applicative MyList where
-   pure x = [x]
-   [] <$> _ = []
-   (f :: fs) <$> xs = map f xs ++ (fs <$> xs)
-
-instance Monad MyList where
-   [] >>= _ = []
-   (x :: xs) >>= f = f x ++ (xs >>= f)
-
-test : MyList Int
-test = do
-   f <- [id, (*2)]
-   x <- [3, 4]
-   return $ f x
-   \end{lstlisting}
+   \lstinputlisting[frame=single, firstline=3, lastline=3]{mylist.idr}
+   \lstinputlisting[firstline=13]{mylist.idr}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -68,21 +41,7 @@ test = do
       emph={[2]},
       emphstyle={[2]\color{namecolor}},
    }
-   \begin{lstlisting}
-data MyVect : Nat -> (a : Type) -> Type where
-   Nil : MyVect 0 a
-   (::) : a -> MyVect n a -> MyVect (S n) a
-
-(++) : MyVect n a -> MyVect m a -> MyVect (n + m) a
-[] ++ ys = ys
-(x :: xs) ++ ys = x :: (xs ++ ys)
-
-infix 9 !!
-
-(!!) : MyVect n a -> Fin n -> a
-(x :: xs) !! fZ = x
-(x :: xs) !! (fS y) = xs !! y
-   \end{lstlisting}
+   \lstinputlisting[firstline=3]{myvect.idr}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -123,15 +82,7 @@ go = go
       emph={[2]broken, ifThenElse},
       emphstyle={[2]\color{namecolor}},
    }
-   \begin{lstlisting}
-broken : Int -> Int
-broken 0 = 1
-broken n = n * broken (n - 1)
-
-ifThenElse : Bool -> a -> a -> a
-ifThenElse True t _ = t
-ifThenElse False _ f = f
-   \end{lstlisting}
+   \lstinputlisting[firstline=5, lastline=11]{strict.idr}
    \texttt{> ifThenElse True 0 (broken (-1))}\\\vspace{0.5em}
    Интерпретатор:\\
    \texttt{0 : Int}\\\vspace{0.5em}
@@ -147,19 +98,7 @@ ifThenElse False _ f = f
       emph={[2]id, lemma_applicative_identity, lemma_applicative_identity_rhs, pure},
       emphstyle={[2]\color{namecolor}},
    }
-   \begin{lstlisting}
-lemma_applicative_identity :  (vs : MyList a)
-                           -> (pure id <$> vs = vs)
-lemma_applicative_identity [] = refl
-lemma_applicative_identity (v :: vs) =
-   let rec = lemma_applicative_identity vs
-   in ?lemma_applicative_identity_rhs
-
-lemma_applicative_identity_rhs = proof
-   intro a,x,xs,rec
-   rewrite rec
-   trivial
-   \end{lstlisting}
+   \lstinputlisting{tactics.idr}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -279,24 +218,17 @@ f : { [STDIO, STATE Int] } Eff ()
    \lstset{
       emph={Provide, Provider, IO, Int, Nat, Type, String},
       emphstyle=\color{typecolor},
-      emph={[2]f, fromFile, strToType, trim, readFile},
+      emph={[2]T, f, fromFile, return, strToType, trim, readFile},
       emphstyle={[2]\color{namecolor}},
    }
-   \begin{lstlisting}
-%language TypeProviders
-
-strToType : String -> Type
-strToType "Int" = Int
-strToType _ = Nat
-
-fromFile : String -> IO (Provider Type)
-fromFile fname = Provide (strToType (trim !(readFile fname)))
-
-%provide (T : Type) with fromFile "config.h"
-
-f : T
-f = 42
-   \end{lstlisting}
+   \lstinputlisting[firstline=3,lastline=17]{providers.idr}
+   \lstset{
+      emph={},
+      emphstyle=\color{typecolor},
+      emph={[2]},
+      emphstyle={[2]\color{namecolor}},
+   }
+   \lstinputlisting[title=config.h,frame=single]{config.h}
 \end{frame}
 
 \frame {
