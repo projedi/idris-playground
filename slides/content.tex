@@ -104,9 +104,9 @@ go = go
 \begin{frame}[fragile]
    \frametitle{\dots}
    \lstset{
-      emph={Int, Maybe, Ord},
+      emph={Bool, Int, Maybe, MkR, Ord, String, Type, R},
       emphstyle=\color{typecolor},
-      emph={[2]myord, sort},
+      emph={[2]g, myord, sort},
       emphstyle={[2]\color{namecolor}},
    }
    \begin{itemize}
@@ -116,28 +116,33 @@ instance [myord] Ord Int where
    ...
 sort @{myord} [2, 1, 3]
          \end{lstlisting}
-   \item Idiom brackets(для аппликативных функторов)
+   \item Idiom brackets (для аппликативных функторов)
          \begin{lstlisting}
 f : Maybe Int -> Maybe Int -> Maybe Int
 f x y = [| x + y |]
          \end{lstlisting}
+   \item !-нотация (для монад)
+         \begin{lstlisting}
+g : Maybe Bool -> Maybe a -> Maybe a -> Maybe a
+g x t f = if !x then t else f
+         \end{lstlisting}
+   \item \texttt{\color{kwcolor}record}s
+      \begin{lstlisting}
+record R : Type where
+   MkR : (f1 : Int) -> (f2 : String) -> R
+      \end{lstlisting}
    \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
    \frametitle{\dots}
    \lstset{
-      emph={Bool, Delay, Lazy, Maybe, Type},
+      emph={Delay, Lazy, Maybe, Type, refl},
       emphstyle=\color{typecolor},
-      emph={[2]Force, boolElim, g},
+      emph={[2]Force, boolElim, myCast},
       emphstyle={[2]\color{namecolor}},
    }
    \begin{itemize}
-   \item !-нотация(для монад)
-         \begin{lstlisting}
-g : Maybe Bool -> Maybe a -> Maybe a -> Maybe a
-g x t f = if !x then t else f
-         \end{lstlisting}
    \item Опциональная ленивость
          \begin{lstlisting}
 data Lazy : Type -> Type where
@@ -147,50 +152,13 @@ Force : Lazy a -> a
          \end{lstlisting}
    \item Изменяемый синтаксис
          \begin{lstlisting}
-syntax if [test] then [t] else [e] = boolElim test (Delay t) (Delay e)
+syntax "if" [test] "then" [t] "else" [e] = boolElim test (Delay t) (Delay e)
          \end{lstlisting}
-   \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-   \frametitle{\dots}
-   \lstset{
-      emph={Type, refl},
-      emphstyle=\color{typecolor},
-      emph={[2]},
-      emphstyle={[2]\color{namecolor}},
-   }
-   \begin{itemize}
    \item Минимальный вывод типов в \texttt{\color{kwcolor}where}
    \item Гетерогенное равенство
       \begin{lstlisting}
 data (=) : a -> b -> Type where
    refl : x = x
-      \end{lstlisting}
-   \item FFI with C
-      TODO
-   \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-   \frametitle{\dots}
-   \lstset{
-      emph={Int, MkR, R, String, Type, refl},
-      emphstyle=\color{typecolor},
-      emph={[2]f, myCast},
-      emphstyle={[2]\color{namecolor}},
-   }
-   \begin{itemize}
-   \item \texttt{\color{kwcolor}public}, \texttt{\color{kwcolor}abstract},
-         \texttt{\color{kwcolor}private} спецификаторы видимости
-      \begin{lstlisting}
-%access public
-abstract f : Int -> Int
-      \end{lstlisting}
-   \item \texttt{\color{kwcolor}record}s
-      \begin{lstlisting}
-record R : Type where
-   MkR : (f1 : Int) -> (f2 : String) -> R
       \end{lstlisting}
    \item \texttt{\color{kwcolor}auto}
       \lstinputlisting[firstline=3]{autoimplicit.idr}
