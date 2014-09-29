@@ -167,17 +167,13 @@ data (=) : a -> b -> Type where
 
 \begin{frame}[fragile]
    \frametitle{Effects вместо трансформеров}%TODO: Can be a topic in itself
-   %TODO: What are STDIO & co? types or not
    \lstset{
-      emph={Eff, Int, STDIO, STATE},
+      emph={Eff, IO, Int, Leaf, Node, Tree, STDIO, STATE},
       emphstyle=\color{typecolor},
-      emph={[2]f},
+      emph={[2]dfs, eff, get, main, print, putStrLn, run, tree, update},
       emphstyle={[2]\color{namecolor}},
    }
-   \begin{lstlisting}
-f : { [STDIO, STATE Int] } Eff ()
-   \end{lstlisting}
-   TODO: Moar
+   \lstinputlisting[firstline=6]{eff.idr}
 \end{frame}
 
 \begin{frame}[fragile]
