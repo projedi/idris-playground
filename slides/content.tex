@@ -52,26 +52,27 @@
       emph={[2]go, myHead},
       emphstyle={[2]\color{namecolor}},
    }
-   \begin{lstlisting}
+   \begin{itemize}
+   \item Для каждой функции отдельно:
+      \begin{lstlisting}
 total myHead : List a -> a
 myHead (x :: xs) = x
-   \end{lstlisting}
-   \texttt{Main.myHead is not total as there are missing cases}
-   \vspace{\baselineskip}
+      \end{lstlisting}
+      \texttt{Main.myHead is not total as there are missing cases}
 
-   \begin{lstlisting}
+   \item Для всего модуля:
+      \begin{lstlisting}
 %default total
 go : Int
 go = go
-   \end{lstlisting}
-   \texttt{Main.go is possibly not total due to recursive path Main.go}
-   \vspace{\baselineskip}
+      \end{lstlisting}
+      \texttt{Main.go is possibly not total due to recursive path Main.go}
 
-   В интерпретаторе:\\
-   \texttt{> :total f}
-   \vspace{\baselineskip}
+   \item Проверить тотальность функции в интерпретаторе:\\
+      \texttt{> :total f}
 
-   В типах вычисляются только тотальные функции.
+   \item В типах вычисляются только тотальные функции.
+   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -83,22 +84,24 @@ go = go
       emphstyle={[2]\color{namecolor}},
    }
    \lstinputlisting[firstline=5, lastline=11]{strict.idr}
-   \texttt{> ifThenElse True 0 (broken (-1))}\\\vspace{0.5em}
-   Интерпретатор:\\
-   \texttt{0 : Int}\\\vspace{0.5em}
-   Скомпилированный код (с точностью до оптимизаций):\\
-   \texttt{segmentation fault ./a.out}
+   \texttt{> ifThenElse True 0 (broken (-1))}\\
+   \begin{itemize}
+   \item Интерпретатор:\\
+      \texttt{0 : Int}\\
+   \item Скомпилированный код (с точностью до оптимизаций):\\
+      \texttt{segmentation fault ./a.out}
+   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
    \frametitle{С тактиками}
    \lstset{
-      emph={MyList, refl},
+      emph={List, refl},
       emphstyle=\color{typecolor},
       emph={[2]id, lemma_applicative_identity, lemma_applicative_identity_rhs, pure},
       emphstyle={[2]\color{namecolor}},
    }
-   \lstinputlisting{tactics.idr}
+   \lstinputlisting[title=tactics.idr, frame=single]{tactics.idr}
 \end{frame}
 
 \begin{frame}[fragile]
