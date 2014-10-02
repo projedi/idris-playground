@@ -30,37 +30,49 @@ mutual
   DBusTyAny = (k : DBusTyKind ** DBusTy k)
 
   Signature : Type
-  Signature = List DBusTyAny
+  Signature = (n : Nat ** Vect n DBusTyAny)
 
-  ObjectPath : Type
-  ObjectPath = List String -- TODO: Each path element must not be empty
+ObjectPath : Type
+ObjectPath = List String -- TODO: Each path element must not be empty
 
+UnixFD : Type
+UnixFD = Bits32
+
+-- TODO: This is completely wrong:
+Int16 : Type
+Int16 = Bits16
+
+Int32 : Type
+Int32 = Bits32
+
+Int64 : Type
+Int64 = Bits64
+
+mutual
   Variant : Type
-  Variant = (k : DBusTyKind ** (t : DBusTy k ** interpDBusTy t))
+  Variant = (t : DBusTyAny ** interpDBusTy t)
 
-  UnixFD : Type
-  UnixFD = Bits32
-
-  interpDBusTy : DBusTy k -> Type
-  interpDBusTy DBusByte = Bits8
-  interpDBusTy DBusBoolean = Bool
-  interpDBusTy DBusInt16 = ?interpDBusTy_rhs_3
-  interpDBusTy DBusUInt16 = Bits16
-  interpDBusTy DBusInt32 = ?interpDBusTy_rhs_5
-  interpDBusTy DBusUInt32 = Bits32
-  interpDBusTy DBusInt64 = ?interpDBusTy_rhs_7
-  interpDBusTy DBusUInt64 = Bits64
-  interpDBusTy DBusDouble = Float
-  interpDBusTy DBusUnixFD = UnixFD
-  interpDBusTy DBusString = String
-  interpDBusTy DBusObjectPath = ObjectPath
-  interpDBusTy DBusSignature = Signature
-  interpDBusTy (DBusStruct xs) = go xs
-    where go [] = ()
-          go ((_ ** x) :: xs) = (interpDBusTy x, go xs)
-  interpDBusTy (DBusArray (_ ** x)) = List (interpDBusTy x)
-  interpDBusTy DBusVariant = Variant
-  interpDBusTy (DBusDictionary x (_ ** y)) = SortedMap (interpDBusTy x) (interpDBusTy y)
+  interpDBusTy : DBusTyAny -> Type
+  interpDBusTy (_ ** DBusByte) = Bits8
+  interpDBusTy (_ ** DBusBoolean) = Bool
+  interpDBusTy (_ ** DBusInt16) = Int16
+  interpDBusTy (_ ** DBusUInt16) = Bits16
+  interpDBusTy (_ ** DBusInt32) = Int32
+  interpDBusTy (_ ** DBusUInt32) = Bits32
+  interpDBusTy (_ ** DBusInt64) = Int64
+  interpDBusTy (_ ** DBusUInt64) = Bits64
+  interpDBusTy (_ ** DBusDouble) = Float
+  interpDBusTy (_ ** DBusUnixFD) = UnixFD
+  interpDBusTy (_ ** DBusString) = String
+  interpDBusTy (_ ** DBusObjectPath) = ObjectPath
+  interpDBusTy (_ ** DBusSignature) = Signature
+  interpDBusTy (_ ** DBusStruct (_ ** xs)) = go xs
+    where go : Vect n DBusTyAny -> Type
+          go [] = ()
+          go (x :: xs) = (assert_total (interpDBusTy x), go xs) -- obviously total
+  interpDBusTy (_ ** DBusArray x) = List (assert_total (interpDBusTy x)) -- obviously total
+  interpDBusTy (_ ** DBusVariant) = assert_total Variant -- obviously total
+  interpDBusTy (_ ** DBusDictionary x y) = SortedMap (assert_total (interpDBusTy (_ ** x))) (assert_total (interpDBusTy y)) -- obviously total
 
 printDBusTy : DBusTyAny -> String
 printDBusTy (_ ** DBusByte) = "y"
@@ -76,9 +88,9 @@ printDBusTy (_ ** DBusUnixFD) = "h"
 printDBusTy (_ ** DBusString) = "s"
 printDBusTy (_ ** DBusSignature) = "g"
 printDBusTy (_ ** DBusVariant) = "v"
-printDBusTy (_ ** DBusArray t) = "a" ++ printDBusTy t
-printDBusTy (_ ** DBusStruct ts) = "(" ++ concat (map printDBusTy ts) ++ ")"
-printDBusTy (_ ** DBusDictionary x y) = "a{" ++ printDBusTy (BasicTy ** x) ++ printDBusTy y ++ "}"
+printDBusTy (_ ** DBusArray t) = "a" ++ assert_total (printDBusTy t) -- obviously total
+printDBusTy (_ ** DBusStruct (_ ** ts)) = "(" ++ assert_total (concat (map printDBusTy ts)) ++ ")" -- ts is a Vect => finite.
+printDBusTy (_ ** DBusDictionary x y) = "a{" ++ assert_total (printDBusTy (_ ** x)) ++ assert_total (printDBusTy y) ++ "}" -- obviously total
 
 parseDBusTy' : List Char -> (Maybe DBusTyAny, List Char)
 parseDBusTy' ('y' :: xs) = (Just (_ ** DBusByte), xs)
@@ -95,7 +107,7 @@ parseDBusTy' ('s' :: xs) = (Just (_ ** DBusString), xs)
 parseDBusTy' ('g' :: xs) = (Just (_ ** DBusSignature), xs)
 parseDBusTy' ('v' :: xs) = (Just (_ ** DBusVariant), xs)
 parseDBusTy' ('a' :: '{' :: xs) with (parseDBusTy' xs)
-  parseDBusTy' ('a' :: '{' :: xs) | (Just (BasicTy ** t1), xs') with (parseDBusTy' xs')
+  parseDBusTy' ('a' :: '{' :: xs) | (Just (BasicTy ** t1), xs') with (parseDBusTy' (assert_smaller xs xs')) -- when we return Just the rest of the input has always something consumed
     parseDBusTy' ('a' :: '{' :: _) | (Just (BasicTy ** t1), _) | (Just t2, '}' :: xs'') = (Just (_ ** DBusDictionary t1 t2), xs'')
     parseDBusTy' ('a' :: '{' :: xs) | (Just _, _) | (_, _) = (Nothing, 'a' :: '{' :: xs)
   parseDBusTy' ('a' :: '{' :: xs) | (_, _) = (Nothing, 'a' :: '{' :: xs)
@@ -104,14 +116,14 @@ parseDBusTy' ('a' :: xs) with (parseDBusTy' xs)
   parseDBusTy' ('a' :: xs) | (Nothing, xs') = (Nothing, 'a' :: xs)
 parseDBusTy' ('(' :: xs) =
   case go xs of
-       (Just ts, xs') => (Just (_ ** DBusStruct ts), xs')
+       (Just sig, xs') => (Just (_ ** DBusStruct sig), xs')
        (Nothing, _) => (Nothing, '(' :: xs)
- where go : List Char -> (Maybe (List DBusTyAny), List Char)
-       go (')' :: xs) = (Just [], xs)
+ where go : List Char -> (Maybe Signature, List Char)
+       go (')' :: xs) = (Just (_ ** []), xs)
        go [] = (Nothing, [])
        go xs with (parseDBusTy' xs)
-         go xs | (Just t, xs') with (go xs')
-           go xs | (Just t, _) | (Just ts, xs'') = (Just (t :: ts), xs'')
+         go xs | (Just t, xs') with (go (assert_smaller xs xs')) -- when we return Just the rest of the input has always something consumed
+           go xs | (Just t, _) | (Just (_ ** ts), xs'') = (Just (_ ** t :: ts), xs'')
            go xs | (Just t, _) | (Nothing, _) = (Nothing, xs)
          go xs | (Nothing, _) = (Nothing, xs)
 parseDBusTy' xs = (Nothing, xs)
