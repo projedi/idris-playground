@@ -115,3 +115,8 @@ parseDBusTy' ('(' :: xs) =
            go xs | (Just t, _) | (Nothing, _) = (Nothing, xs)
          go xs | (Nothing, _) = (Nothing, xs)
 parseDBusTy' xs = (Nothing, xs)
+
+parseDBusTy : String -> Maybe DBusTyAny
+parseDBusTy str with (parseDBusTy' $ unpack str)
+  parseDBusTy str | (Just t, []) = Just t
+  parseDBusTy str | _ = Nothing
