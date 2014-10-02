@@ -1,5 +1,9 @@
 module dbus
 
+import Data.SortedMap
+
+%default total
+
 data DBusTyKind = BasicTy | ContainerTy
 
 mutual
@@ -20,7 +24,7 @@ mutual
     DBusStruct : Signature -> DBusTy ContainerTy
     DBusArray : DBusTyAny -> DBusTy ContainerTy
     DBusVariant : DBusTy ContainerTy
-    DBusDictEntry : DBusTy BasicTy -> DBusTyAny -> DBusTy ContainerTy
+    DBusDictionary : DBusTy BasicTy -> DBusTyAny -> DBusTy ContainerTy
 
   DBusTyAny : Type
   DBusTyAny = (k : DBusTyKind ** DBusTy k)
@@ -28,28 +32,53 @@ mutual
   Signature : Type
   Signature = List DBusTyAny
 
-ObjectPath : Type
-ObjectPath = List String -- TODO: Each path element must not be empty
+  ObjectPath : Type
+  ObjectPath = List String -- TODO: Each path element must not be empty
 
-interpDBusTy : DBusTy k -> Type
-interpDBusTy DBusByte = Bits8
-interpDBusTy DBusBoolean = Bool
-interpDBusTy DBusInt16 = ?interpDBusTy_rhs_3
-interpDBusTy DBusUInt16 = Bits16
-interpDBusTy DBusInt32 = ?interpDBusTy_rhs_5
-interpDBusTy DBusUInt32 = Bits32
-interpDBusTy DBusInt64 = ?interpDBusTy_rhs_7
-interpDBusTy DBusUInt64 = Bits64
-interpDBusTy DBusDouble = Float
-interpDBusTy DBusUnixFD = ?interpDBusTy_rhs_10
-interpDBusTy DBusString = String
-interpDBusTy DBusObjectPath = ObjectPath
-interpDBusTy DBusSignature = Signature
-interpDBusTy (DBusStruct []) = ()
-interpDBusTy (DBusStruct ((_ ** x) :: xs)) = (interpDBusTy x, interpDBusTy (DBusStruct xs))
-interpDBusTy (DBusArray (_ ** x)) = List (interpDBusTy x)
-interpDBusTy DBusVariant = ?interpDBusTy_rhs_16
-interpDBusTy (DBusDictEntry x (_ ** y)) = (interpDBusTy x, interpDBusTy y)
+  Variant : Type
+  Variant = (k : DBusTyKind ** (t : DBusTy k ** interpDBusTy t))
+
+  UnixFD : Type
+  UnixFD = Bits32
+
+  interpDBusTy : DBusTy k -> Type
+  interpDBusTy DBusByte = Bits8
+  interpDBusTy DBusBoolean = Bool
+  interpDBusTy DBusInt16 = ?interpDBusTy_rhs_3
+  interpDBusTy DBusUInt16 = Bits16
+  interpDBusTy DBusInt32 = ?interpDBusTy_rhs_5
+  interpDBusTy DBusUInt32 = Bits32
+  interpDBusTy DBusInt64 = ?interpDBusTy_rhs_7
+  interpDBusTy DBusUInt64 = Bits64
+  interpDBusTy DBusDouble = Float
+  interpDBusTy DBusUnixFD = UnixFD
+  interpDBusTy DBusString = String
+  interpDBusTy DBusObjectPath = ObjectPath
+  interpDBusTy DBusSignature = Signature
+  interpDBusTy (DBusStruct xs) = go xs
+    where go [] = ()
+          go ((_ ** x) :: xs) = (interpDBusTy x, go xs)
+  interpDBusTy (DBusArray (_ ** x)) = List (interpDBusTy x)
+  interpDBusTy DBusVariant = Variant
+  interpDBusTy (DBusDictionary x (_ ** y)) = SortedMap (interpDBusTy x) (interpDBusTy y)
+
+printDBusTy : DBusTyAny -> String
+printDBusTy (_ ** DBusByte) = "y"
+printDBusTy (_ ** DBusBoolean) = "b"
+printDBusTy (_ ** DBusInt16) = "n"
+printDBusTy (_ ** DBusUInt16) = "q"
+printDBusTy (_ ** DBusInt32) = "i"
+printDBusTy (_ ** DBusUInt32) = "u"
+printDBusTy (_ ** DBusInt64) = "x"
+printDBusTy (_ ** DBusUInt64) = "t"
+printDBusTy (_ ** DBusDouble) = "d"
+printDBusTy (_ ** DBusUnixFD) = "h"
+printDBusTy (_ ** DBusString) = "s"
+printDBusTy (_ ** DBusSignature) = "g"
+printDBusTy (_ ** DBusVariant) = "v"
+printDBusTy (_ ** DBusArray t) = "a" ++ printDBusTy t
+printDBusTy (_ ** DBusStruct ts) = "(" ++ concat (map printDBusTy ts) ++ ")"
+printDBusTy (_ ** DBusDictionary x y) = "a{" ++ printDBusTy (BasicTy ** x) ++ printDBusTy y ++ "}"
 
 parseDBusTy' : List Char -> (Maybe DBusTyAny, List Char)
 parseDBusTy' ('y' :: xs) = (Just (_ ** DBusByte), xs)
@@ -65,6 +94,11 @@ parseDBusTy' ('h' :: xs) = (Just (_ ** DBusUnixFD), xs)
 parseDBusTy' ('s' :: xs) = (Just (_ ** DBusString), xs)
 parseDBusTy' ('g' :: xs) = (Just (_ ** DBusSignature), xs)
 parseDBusTy' ('v' :: xs) = (Just (_ ** DBusVariant), xs)
+parseDBusTy' ('a' :: '{' :: xs) with (parseDBusTy' xs)
+  parseDBusTy' ('a' :: '{' :: xs) | (Just (BasicTy ** t1), xs') with (parseDBusTy' xs')
+    parseDBusTy' ('a' :: '{' :: _) | (Just (BasicTy ** t1), _) | (Just t2, '}' :: xs'') = (Just (_ ** DBusDictionary t1 t2), xs'')
+    parseDBusTy' ('a' :: '{' :: xs) | (Just _, _) | (_, _) = (Nothing, 'a' :: '{' :: xs)
+  parseDBusTy' ('a' :: '{' :: xs) | (_, _) = (Nothing, 'a' :: '{' :: xs)
 parseDBusTy' ('a' :: xs) with (parseDBusTy' xs)
   parseDBusTy' ('a' :: xs) | (Just t, xs') = (Just (_ ** DBusArray t), xs')
   parseDBusTy' ('a' :: xs) | (Nothing, xs') = (Nothing, 'a' :: xs)
@@ -80,9 +114,4 @@ parseDBusTy' ('(' :: xs) = go xs
        go xs with (go1 xs)
          go xs | (Just ts, xs') = (Just (_ ** DBusStruct ts), xs')
          go xs | (Nothing, _) = (Nothing, '(' :: xs)
-parseDBusTy' ('{' :: xs) with (parseDBusTy' xs)
-  parseDBusTy' ('{' :: xs) | (Just (BasicTy ** t1), xs') with (parseDBusTy' xs')
-    parseDBusTy' ('{' :: _) | (Just (BasicTy ** t1), _) | (Just t2, '}' :: xs'') = (Just (_ ** DBusDictEntry t1 t2), xs'')
-    parseDBusTy' ('{' :: xs) | (Just _, _) | (_, _) = (Nothing, '{' :: xs)
-  parseDBusTy' ('{' :: xs) | (_, _) = (Nothing, '{' :: xs)
 parseDBusTy' xs = (Nothing, xs)
