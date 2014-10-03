@@ -74,23 +74,23 @@ mutual
   interpDBusTy (_ ** DBusVariant) = assert_total Variant -- obviously total
   interpDBusTy (_ ** DBusDictionary x y) = SortedMap (assert_total (interpDBusTy (_ ** x))) (assert_total (interpDBusTy y)) -- obviously total
 
-printDBusTy : DBusTyAny -> String
-printDBusTy (_ ** DBusByte) = "y"
-printDBusTy (_ ** DBusBoolean) = "b"
-printDBusTy (_ ** DBusInt16) = "n"
-printDBusTy (_ ** DBusUInt16) = "q"
-printDBusTy (_ ** DBusInt32) = "i"
-printDBusTy (_ ** DBusUInt32) = "u"
-printDBusTy (_ ** DBusInt64) = "x"
-printDBusTy (_ ** DBusUInt64) = "t"
-printDBusTy (_ ** DBusDouble) = "d"
-printDBusTy (_ ** DBusUnixFD) = "h"
-printDBusTy (_ ** DBusString) = "s"
-printDBusTy (_ ** DBusSignature) = "g"
-printDBusTy (_ ** DBusVariant) = "v"
-printDBusTy (_ ** DBusArray t) = "a" ++ assert_total (printDBusTy t) -- obviously total
-printDBusTy (_ ** DBusStruct (_ ** ts)) = "(" ++ assert_total (concat (map printDBusTy ts)) ++ ")" -- ts is a Vect => finite.
-printDBusTy (_ ** DBusDictionary x y) = "a{" ++ assert_total (printDBusTy (_ ** x)) ++ assert_total (printDBusTy y) ++ "}" -- obviously total
+printDBusTy' : DBusTyAny -> List Char
+printDBusTy' (_ ** DBusByte) = ['y']
+printDBusTy' (_ ** DBusBoolean) = ['b']
+printDBusTy' (_ ** DBusInt16) = ['n']
+printDBusTy' (_ ** DBusUInt16) = ['q']
+printDBusTy' (_ ** DBusInt32) = ['i']
+printDBusTy' (_ ** DBusUInt32) = ['u']
+printDBusTy' (_ ** DBusInt64) = ['x']
+printDBusTy' (_ ** DBusUInt64) = ['t']
+printDBusTy' (_ ** DBusDouble) = ['d']
+printDBusTy' (_ ** DBusUnixFD) = ['h']
+printDBusTy' (_ ** DBusString) = ['s']
+printDBusTy' (_ ** DBusSignature) = ['g']
+printDBusTy' (_ ** DBusVariant) = ['v']
+printDBusTy' (_ ** DBusArray t) = 'a' :: assert_total (printDBusTy' t) -- obviously total
+printDBusTy' (_ ** DBusStruct (_ ** ts)) = '(' :: assert_total (concat (map printDBusTy' ts)) ++ [')'] -- ts is a Vect => finite.
+printDBusTy' (_ ** DBusDictionary x y) = 'a' :: '{' :: assert_total (printDBusTy' (_ ** x)) ++ assert_total (printDBusTy' y) ++ ['}'] -- obviously total
 
 parseDBusTy' : List Char -> (Maybe DBusTyAny, List Char)
 parseDBusTy' ('y' :: xs) = (Just (_ ** DBusByte), xs)
@@ -128,7 +128,32 @@ parseDBusTy' ('(' :: xs) =
          go xs | (Nothing, _) = (Nothing, xs)
 parseDBusTy' xs = (Nothing, xs)
 
+printDBusTy : DBusTyAny -> String
+printDBusTy = pack . printDBusTy'
+
 parseDBusTy : String -> Maybe DBusTyAny
 parseDBusTy str with (parseDBusTy' $ unpack str)
   parseDBusTy str | (Just t, []) = Just t
   parseDBusTy str | _ = Nothing
+
+------------------- Lemmas ---------------------
+
+lemma_print_rest : (inp : List Char) -> (t : DBusTyAny) -> (rest : List Char) -> parseDBusTy' inp = (Just t, []) -> parseDBusTy' (inp ++ rest) = (Just t, rest)
+
+lemma_parse_print : (t : DBusTyAny) -> parseDBusTy' (printDBusTy' t) = (Just t, [])
+lemma_parse_print (_ ** DBusByte) = refl
+lemma_parse_print (_ ** DBusBoolean) = refl
+lemma_parse_print (_ ** DBusInt16) = refl
+lemma_parse_print (_ ** DBusUInt16) = refl
+lemma_parse_print (_ ** DBusInt32) = refl
+lemma_parse_print (_ ** DBusUInt32) = refl
+lemma_parse_print (_ ** DBusInt64) = refl
+lemma_parse_print (_ ** DBusUInt64) = refl
+lemma_parse_print (_ ** DBusDouble) = refl
+lemma_parse_print (_ ** DBusUnixFD) = refl
+lemma_parse_print (_ ** DBusString) = refl
+lemma_parse_print (_ ** DBusSignature) = refl
+lemma_parse_print (_ ** DBusVariant) = refl
+lemma_parse_print (_ ** DBusArray t) = ?lemma_parse_print_rhs_1
+lemma_parse_print (_ ** DBusStruct (_ ** ts)) = ?lemma_parse_print_rhs_2
+lemma_parse_print (_ ** DBusDictionary x y) = ?lemma_parse_print_rhs_3
