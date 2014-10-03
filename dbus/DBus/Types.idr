@@ -1,4 +1,4 @@
-module dbus
+module DBus.Types
 
 import Data.SortedMap
 
@@ -135,25 +135,3 @@ parseDBusTy : String -> Maybe DBusTyAny
 parseDBusTy str with (parseDBusTy' $ unpack str)
   parseDBusTy str | (Just t, []) = Just t
   parseDBusTy str | _ = Nothing
-
-------------------- Lemmas ---------------------
-
-lemma_print_rest : (inp : List Char) -> (t : DBusTyAny) -> (rest : List Char) -> parseDBusTy' inp = (Just t, []) -> parseDBusTy' (inp ++ rest) = (Just t, rest)
-
-lemma_parse_print : (t : DBusTyAny) -> parseDBusTy' (printDBusTy' t) = (Just t, [])
-lemma_parse_print (_ ** DBusByte) = refl
-lemma_parse_print (_ ** DBusBoolean) = refl
-lemma_parse_print (_ ** DBusInt16) = refl
-lemma_parse_print (_ ** DBusUInt16) = refl
-lemma_parse_print (_ ** DBusInt32) = refl
-lemma_parse_print (_ ** DBusUInt32) = refl
-lemma_parse_print (_ ** DBusInt64) = refl
-lemma_parse_print (_ ** DBusUInt64) = refl
-lemma_parse_print (_ ** DBusDouble) = refl
-lemma_parse_print (_ ** DBusUnixFD) = refl
-lemma_parse_print (_ ** DBusString) = refl
-lemma_parse_print (_ ** DBusSignature) = refl
-lemma_parse_print (_ ** DBusVariant) = refl
-lemma_parse_print (_ ** DBusArray t) = ?lemma_parse_print_rhs_1
-lemma_parse_print (_ ** DBusStruct (_ ** ts)) = ?lemma_parse_print_rhs_2
-lemma_parse_print (_ ** DBusDictionary x y) = ?lemma_parse_print_rhs_3
