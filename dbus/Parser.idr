@@ -5,6 +5,11 @@ import Control.Monad.State
 %default total
 %access public
 
+instance Enum Char where
+  pred = chr . (\n => n - 1) . ord
+  toNat = cast . ord
+  fromNat = chr . cast
+
 abstract record Parser : (a : Type) -> Type where
   MkParser : (parserState : StateT (List Char) Maybe a) -> Parser a
 
@@ -77,8 +82,25 @@ anyOf : List Char -> Parser Char
 anyOf (c :: cs) = (char c $> return c) <|> anyOf cs
 anyOf [] = empty
 
+noneOf : List Char -> Parser Char
+noneOf cs = do
+  c <- anyChar
+  if c `elem` cs then empty else return c
+
 whitespace : Parser ()
 whitespace = anyOf [' ', '\t', '\n'] $> return ()
 
 partial whitespaces : Parser ()
 whitespaces = many whitespace $> return ()
+
+alpha : Parser Char
+alpha = anyOf ['a'..'z'] <|> anyOf ['A'..'Z']
+
+digit : Parser Char
+digit = anyOf ['0'..'9']
+
+alphaNum : Parser Char
+alphaNum = alpha <|> digit
+
+optional : Parser a -> Parser (Maybe a)
+optional p = [| Just p |] <|> [| Nothing |]
