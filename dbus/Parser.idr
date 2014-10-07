@@ -58,5 +58,11 @@ string str = for_ (unpack str) char
 
 takeWhile : (Char -> Bool) -> Parser String
 takeWhile f = [| pack go |]
-  where go : Parser (List Char)
-        go = [| anyChar :: assert_total go |] <|> [| [] |] -- TODO: total because go is called only when anyChar has consumed some input
+  where -- TODO: total because go is called only when anyChar has consumed some input
+        go : Parser (List Char)
+        go =  (do x <- anyChar
+                  if f x then [| pure x :: assert_total go |] else empty)
+          <|> return []
+
+partial many : Parser a -> Parser (List a)
+many p = [| p :: many p |] <|> [| [] |]
