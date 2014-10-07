@@ -66,3 +66,13 @@ takeWhile f = [| pack go |]
 
 partial many : Parser a -> Parser (List a)
 many p = [| p :: many p |] <|> [| [] |]
+
+anyOf : List Char -> Parser Char
+anyOf (c :: cs) = (char c $> return c) <|> anyOf cs
+anyOf [] = empty
+
+whitespace : Parser ()
+whitespace = anyOf [' ', '\t', '\n'] $> return ()
+
+partial whitespaces : Parser ()
+whitespaces = many whitespace $> return ()
