@@ -65,8 +65,13 @@ takeWhile f = [| pack go |]
                   if f x then [| pure x :: assert_total go |] else empty)
           <|> return []
 
+-- TODO: !-notation does not work here: It probably is binding vars to early(bug?)
 partial many : Parser a -> Parser (List a)
-many p = [| p :: many p |] <|> [| [] |]
+many p = (do x <- p
+             xs <- many p
+             return $ x :: xs
+         )
+      <|> return []
 
 anyOf : List Char -> Parser Char
 anyOf (c :: cs) = (char c $> return c) <|> anyOf cs
