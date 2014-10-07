@@ -30,6 +30,14 @@ eof = MkParser
         go [] = Just ((), [])
         go _ = Nothing
 
+char : Char -> Parser ()
+char c = MkParser
+  { parserState = ST go
+  }
+  where go : List Char -> Maybe ((), List Char)
+        go [] = Nothing
+        go (x :: input) = if x == c then Just ((), input) else Nothing
+
 string : String -> Parser ()
 string str = MkParser
   { parserState = ST $ go (unpack str)
@@ -46,3 +54,12 @@ anyChar = MkParser
   where go : List Char -> Maybe (Char, List Char)
         go [] = Nothing
         go (x :: input) = Just (x, input)
+
+takeWhile : (Char -> Bool) -> Parser String
+takeWhile f = MkParser
+  { parserState = ST go
+  }
+  where go : List Char -> Maybe (String, List Char)
+        go inp =
+          let (pref, suf) = span f inp
+          in Just (pack pref, suf)
