@@ -22,21 +22,25 @@ instance Alternative Parser where
          Nothing => runStateT st2 s
          Just x => Just x
 
+private getInput : Parser (List Char)
+getInput = MkParser { parserState = get }
+
+private setInput : List Char -> Parser ()
+setInput inp = MkParser { parserState = put inp }
+
 eof : Parser ()
-eof = MkParser
-  { parserState = ST go
-  }
-  where go : List Char -> Maybe ((), List Char)
-        go [] = Just ((), [])
-        go _ = Nothing
+eof = do
+  inp <- getInput
+  case inp of
+       [] => pure ()
+       _ => empty
 
 anyChar : Parser Char
-anyChar = MkParser
-  { parserState = ST go
-  }
-  where go : List Char -> Maybe (Char, List Char)
-        go [] = Nothing
-        go (x :: input) = Just (x, input)
+anyChar = do
+  inp <- getInput
+  case inp of
+       [] => empty
+       (x :: xs) => setInput xs $> pure x
 
 char : Char -> Parser ()
 char c = do
