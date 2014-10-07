@@ -48,10 +48,11 @@ anyChar = do
        [] => empty
        (x :: xs) => setInput xs $> pure x
 
-char : Char -> Parser ()
+char : Char -> Parser Char
 char c = do
   x <- anyChar
   when (x /= c) empty
+  return c
 
 string : String -> Parser ()
 string str = for_ (unpack str) char
