@@ -2,6 +2,8 @@ module Parser
 
 import Control.Monad.State
 
+%default total
+
 record Parser : (a : Type) -> Type where
   MkParser : (parserState : StateT (List Char) Maybe a) -> Parser a
 
@@ -53,6 +55,4 @@ string str = for_ (unpack str) char
 takeWhile : (Char -> Bool) -> Parser String
 takeWhile f = [| pack go |]
   where go : Parser (List Char)
-        go = do
-          c <- [| Just anyChar |] <|> [| Nothing |]
-          maybe (return []) (\x => return $ x :: !go) c
+        go = [| anyChar :: assert_total go |] <|> [| [] |] -- TODO: total because go is called only when anyChar has consumed some input
