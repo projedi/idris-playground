@@ -4,8 +4,11 @@ import Control.Monad.State
 
 %default total
 
-record Parser : (a : Type) -> Type where
+abstract record Parser : (a : Type) -> Type where
   MkParser : (parserState : StateT (List Char) Maybe a) -> Parser a
+
+parse : Parser a -> String -> Maybe a
+parse p str = map fst $ runStateT (parserState p) (unpack str)
 
 instance Functor Parser where
   map f (MkParser st) = MkParser (map f st)
