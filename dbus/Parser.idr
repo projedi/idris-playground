@@ -3,6 +3,7 @@ module Parser
 import Control.Monad.State
 
 %default total
+%access public
 
 abstract record Parser : (a : Type) -> Type where
   MkParser : (parserState : StateT (List Char) Maybe a) -> Parser a
