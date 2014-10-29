@@ -2,7 +2,8 @@ module DBus.Types
 
 import Data.SortedMap
 
-%default total
+-- TODO: Turned off totality checker for now
+-- %default total
 
 data DBusTyKind = BasicTy | ContainerTy
 
