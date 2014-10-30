@@ -28,13 +28,26 @@ nodePropertyNameParser = nodeNameParser
 nodePropertyParser : Parser (String, String)
 nodePropertyParser = [| (\n,_,v => (n, v)) nodePropertyNameParser (char '=' $> whitespaces) nodePropertyValueParser |]
 
+commentParser : Parser ()
+commentParser = do
+  string "<!--"
+  stuff
+  whitespaces
+ where stuff : Parser ()
+       stuff = string "-->" <|> (anyChar $> stuff)
+
+commentsParser : Parser ()
+commentsParser = many commentParser $> return ()
+
 nodeParser : Parser XMLNode
 nodeParser = do
+  commentsParser
   langle
   n <- nodeNameParser
   ps <- many nodePropertyParser
   children <-  (crangle $> pure (the (List XMLNode) []))
            <|> (rangle $> many nodeParser <$ clangle <$ string n <$ whitespaces <$ rangle)
+  commentsParser
   return $ MkXMLNode n ps children
  where langle : Parser ()
        langle = char '<' $> whitespaces
