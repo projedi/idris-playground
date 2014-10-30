@@ -11,6 +11,24 @@ public record XMLNode : Type where
     -> (nodeChildren : List XMLNode)
     -> XMLNode
 
+ppProperties : List (String, String) -> String
+ppProperties [] = ""
+ppProperties ((pname, pval) :: ps) = " " ++ pname ++ " = " ++ pval ++ ppProperties ps
+
+unlines : List String -> String
+unlines [] = ""
+unlines (x :: xs) = x ++ "\n" ++ unlines xs
+
+ppXML : String -> XMLNode -> String
+ppXML strPrefix node =  strPrefix ++ "<" ++ nodeName node
+                     ++ ppProperties (nodeProperties node)
+                     ++ ">\n"
+                     ++ unlines (map (ppXML ("   " ++ strPrefix)) (nodeChildren node))
+                     ++ strPrefix ++ "</" ++ nodeName node ++ ">"
+
+instance Show XMLNode where
+  show = ppXML ""
+
 public XML : Type
 XML = List XMLNode
 
