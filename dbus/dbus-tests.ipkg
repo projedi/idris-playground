@@ -7,4 +7,4 @@ sourcedir = tests
 
 opts = "-p dbus"
 
-tests = test
+tests = xmlParserTests
