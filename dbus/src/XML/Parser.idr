@@ -13,7 +13,8 @@ public record XMLNode : Type where
 
 ppProperties : List (String, String) -> String
 ppProperties [] = ""
-ppProperties ((pname, pval) :: ps) = " " ++ pname ++ " = " ++ pval ++ ppProperties ps
+ppProperties ((pname, pval) :: ps) =
+  " " ++ pname ++ " = \"" ++ pval ++ "\"" ++ ppProperties ps
 
 unlines : List String -> String
 unlines [] = ""
@@ -40,8 +41,12 @@ nodeNameParser =
   (map pack $ many (alphaNum <|> anyOf ['_', '-'])) <$ whitespaces
 
 nodePropertyValueParser : Parser String
-nodePropertyValueParser =
-  (return $ pack $ !(char '"') :: !(many (noneOf ['"'])) ++ [!(char '"')]) <$ whitespaces
+nodePropertyValueParser = do
+  char '"'
+  str <- many $ noneOf ['"']
+  char '"'
+  whitespaces
+  return $ pack str
 
 nodePropertyNameParser : Parser String
 nodePropertyNameParser = nodeNameParser
