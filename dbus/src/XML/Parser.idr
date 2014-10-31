@@ -19,10 +19,13 @@ unlines : List String -> String
 unlines [] = ""
 unlines (x :: xs) = x ++ "\n" ++ unlines xs
 
+public showOneNode : XMLNode -> String
+showOneNode node =  "<" ++ nodeName node
+                 ++ ppProperties (nodeProperties node)
+                 ++ ">"
+
 ppXML : String -> XMLNode -> String
-ppXML strPrefix node =  strPrefix ++ "<" ++ nodeName node
-                     ++ ppProperties (nodeProperties node)
-                     ++ ">\n"
+ppXML strPrefix node =  strPrefix ++ showOneNode node ++ "\n"
                      ++ unlines (map (ppXML ("   " ++ strPrefix)) (nodeChildren node))
                      ++ strPrefix ++ "</" ++ nodeName node ++ ">"
 
